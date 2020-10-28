@@ -6,23 +6,23 @@
         alt="file-type-logo"
         class="mr-8"
       >
-      <span class="cursor-pointer">
-        走吧 ! 一起用日語去旅行.docx
+      <span class="cursor-pointer" @click.prevent="deleteFile">
+        {{ name }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        2020/10/07
+        {{ lastUpdateTime }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        3.2MB
+        {{ size }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        RayLin
+        {{ author }}
       </span>
     </div>
     <div class="col-span-1 py-4">
@@ -30,3 +30,33 @@
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  props: {
+    name: {
+      type: String,
+      required: true,
+    },
+    lastUpdateTime: {
+      type: Number,
+      required: true,
+    },
+    size: {
+      type: Number,
+      required: true,
+    },
+    author: {
+      type: String,
+      required: false,
+      default: 'undefinedUser',
+    },
+  },
+  methods: {
+    deleteFile() {
+      const key = '-MKi9Wa0s2tn4_Y0Cd0w';
+      this.$store.dispatch('storage/deleteFile', key);
+    },
+  },
+};
+</script>

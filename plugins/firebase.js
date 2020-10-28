@@ -1,4 +1,6 @@
-import Firebase from 'firebase';
+import Firebase from 'firebase/app';
+import 'firebase/storage';
+import 'firebase/database';
 
 const firebaseConfig = {
   apiKey: process.env.SDK_APIKEY,
@@ -11,13 +13,13 @@ const firebaseConfig = {
   measurementId: process.env.SDK_MEASUREMENTID,
 };
 
-if (!Firebase.apps.length) {
-  Firebase.initializeApp(firebaseConfig);
+const firebase = Firebase;
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
 }
 
-const fireDatabase = Firebase.database();
+const database = firebase.database();
+const storage = firebase.storage();
 
-export {
-  fireDatabase,
-  Firebase,
-};
+export { storage, database };

@@ -23,22 +23,15 @@
         更多
       </div>
     </div>
-    <FileInfo />
-    <FileInfo />
-    <FileInfo />
-    <FileInfo />
-    <FileInfo />
-    <FileInfo />
+    <slot />
   </div>
 </template>
 
 <script>
-import FileInfo from '@/components/UI/FileInfo';
 import MoreInfo from '@/components/UI/MoreInfo';
 
 export default {
   components: {
-    FileInfo,
     MoreInfo,
   },
   props: {
