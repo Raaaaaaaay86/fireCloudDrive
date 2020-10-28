@@ -21,6 +21,7 @@ export default {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
+    '~/plugins/firebase.js',
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -45,5 +46,16 @@ export default {
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
+  },
+
+  env: {
+    SDK_APIKEY: 'AIzaSyDqBvTzi_xsk-7lQhmKtdYIvfCtZBe1juc',
+    SDK_AUTHDOMAIN: 'clouddrive-3cbb9.firebaseapp.com',
+    SDK_DATABASEURL: 'https://clouddrive-3cbb9.firebaseio.com',
+    SDK_PROJECTID: 'clouddrive-3cbb9',
+    SDK_STORAGEBUCKET: 'clouddrive-3cbb9.appspot.com',
+    SDK_MESSAGINGSENDERID: '856072363107',
+    SDK_APPID: '1:856072363107:web:58d82817bf9ae57fbd6c56',
+    SDK_MEASUREMENTID: 'G-5CX3L16TQW',
   },
 };

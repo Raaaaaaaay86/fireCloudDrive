@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-param-reassign */
 const state = () => ({
-  visible: true,
+  visible: false,
 });
 
 const actions = {
