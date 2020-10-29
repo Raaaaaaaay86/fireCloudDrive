@@ -1,15 +1,44 @@
 <template>
-  <div class="grid grid-cols-12 h-screen">
+  <div
+    class="grid grid-cols-12 h-screen"
+  >
     <div class="pt-16 px-8 pb-8 flex flex-col items-center col-span-2 bg-blue-400 shadow select-none">
       <img class="mb-12" :src="require('@/assets/imgs/logo@2x.png')" alt="logo">
       <div
-        class="inline-block px-8 py-2 mb-8 bg-white text-blue-400 text-xl rounded-full shadow cursor-pointer"
-        @click="$refs.file.click()"
+        id="uploadButton"
+        ref="uploadButton"
+        class="inline-block px-8 py-2 mb-8 bg-white text-blue-400 text-xl rounded-full shadow relative cursor-pointer"
+        @click.prevent="uploadList = !uploadList"
       >
         <i class="fas fa-cloud-upload-alt" />
         上傳檔案
+        <div
+          class="uploadDropDown"
+          :class=" uploadList ? 'block' : 'hidden' "
+        >
+          <ul>
+            <li @click.prevent="$refs.file.click()">
+              <i class="far fa-file" />
+              上傳檔案
+            </li>
+            <li>
+              <i class="far fa-folder" />
+              上傳資料夾
+            </li>
+            <li>
+              <i class="far fa-folder-open" />
+              新資料夾
+            </li>
+          </ul>
+        </div>
       </div>
-      <input id="fileUpload" ref="file" type="file" hidden @change="onFileChange">
+      <input
+        id="fileUpload"
+        ref="file"
+        type="file"
+        hidden
+        @change="onFileChange"
+      >
       <div class="w-full flex text-2xl flex-col items-center text-white">
         <nuxt-link to="/" class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500">
           <i class="far fa-folder" />
@@ -50,17 +79,43 @@ export default {
   },
   data() {
     return {
-      file: '',
+      uploadList: false,
     };
+  },
+  mounted() {
+    document.addEventListener('click', this.close);
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.close);
   },
   methods: {
     onFileChange(e) {
       this.$store.dispatch('storage/uploadFile', e);
+    },
+    close(e) {
+      if (!this.$refs.uploadButton.contains(e.target)) {
+        this.uploadList = false;
+      }
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-
+.uploadDropDown{
+  position: absolute;
+  background-color: #fff;
+  color: #2d3748;
+  font-size: 16px;
+  font-weight: 600;
+  min-width: 150px;
+  margin-top: 16px;
+  padding: 16px;
+  left: 50%;
+  transform: translatex(-50%);
+  border-radius: 5px;
+  ul li{
+    margin-bottom: 10px;
+  }
+}
 </style>

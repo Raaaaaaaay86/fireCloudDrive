@@ -1,6 +1,23 @@
 <template>
   <div class="p-16">
-    <SearchBar class="ml-auto mb-8" />
+    <div
+      ref="searchBarArea"
+      class="float-right relative ml-auto mb-8"
+    >
+      <SearchBar
+        @toggleSortList=" sortList = !sortList"
+      />
+      <ul
+        ref="iinput"
+        class="sortList"
+        :class=" sortList ? 'block' : 'hidden' "
+      >
+        <li>依上傳時間</li>
+        <li>依修改時間</li>
+        <li>依檔案大小</li>
+        <li>依擁有者</li>
+      </ul>
+    </div>
     <FilesTable title="我的檔案" class="mb-8">
       <FileInfo
         v-for="file in fetchedFiles"
@@ -25,12 +42,50 @@ export default {
     FilesTable,
     FileInfo,
   },
+  data() {
+    return {
+      sortList: false,
+    };
+  },
   computed: {
     ...mapGetters(['fetchedFiles']),
+  },
+  mounted() {
+    document.addEventListener('click', this.close);
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.close);
+  },
+  methods: {
+    close(e) {
+      if (!this.$refs.searchBarArea.contains(e.target)) {
+        this.sortList = false;
+      }
+    },
   },
 };
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+.sortList{
+  position: absolute;
+  z-index: 999;
+  padding: 16px 0 16px 0;
+  width: 420px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 10px;
+  background-color: #fff;
+  color: #2d3748;
+  border: 1px solid rgba(45, 55, 72, .1);
+  border-radius: 5px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05)!important;
+  li{
+    padding: 8px 16px 8px 16px;
+    font-weight: 600;
+    &:hover{
+      background-color: #e2e8f0;
+    }
+  }
+}
 </style>
