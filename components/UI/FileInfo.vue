@@ -35,7 +35,9 @@
       class="fileList"
       :class=" fileList ? 'block' : 'hidden' "
     >
-      <li>下載</li>
+      <li @click="downloadFile">
+        下載
+      </li>
       <li>標示星號</li>
       <li @click.prevent="deleteFile(id)">
         刪除
@@ -69,6 +71,11 @@ export default {
       type: String,
       required: false,
       default: 'noKey',
+    },
+    downloadUrl: {
+      type: String,
+      required: false,
+      default: '/#',
     },
     author: {
       type: String,
@@ -113,6 +120,9 @@ export default {
       if (!this.$el.contains(e.target)) {
         this.fileList = false;
       }
+    },
+    downloadFile() {
+      window.open(this.downloadUrl, 'download');
     },
   },
 };

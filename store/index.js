@@ -28,7 +28,7 @@ const actions = {
           .then((snap) => {
             const pushRef = database.ref('/files').push();
             const data = {
-              downdloadURL: snap,
+              downloadURL: snap,
               fileName: file.name,
               storagePath: `files/${file.name}`,
               updateTime: new Date().getTime(),

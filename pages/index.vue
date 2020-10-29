@@ -26,6 +26,7 @@
         :name="file.fileName"
         :size="file.size"
         :last-update-time="file.updateTime"
+        :download-url="file.downloadURL"
       />
     </FilesTable>
   </div>

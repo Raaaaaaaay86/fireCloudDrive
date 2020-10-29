@@ -4,7 +4,6 @@
       <h2 class="font-bold text-2xl">
         {{ title }}
       </h2>
-      <MoreInfo />
     </div>
     <div class="grid grid-cols-12 text-gray-800 text-xl font-bold">
       <div class="col-span-5 py-4 pl-4 border-b border-gray-400">
@@ -28,12 +27,7 @@
 </template>
 
 <script>
-import MoreInfo from '@/components/UI/MoreInfo';
-
 export default {
-  components: {
-    MoreInfo,
-  },
   props: {
     title: {
       type: String,
