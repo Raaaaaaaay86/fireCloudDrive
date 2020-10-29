@@ -10,7 +10,7 @@
         名稱 ▼
       </div>
       <div class="col-span-2 py-4 border-b border-gray-400">
-        上次修改
+        上傳時間
       </div>
       <div class="col-span-2 py-4 border-b border-gray-400">
         檔案大小
@@ -18,9 +18,7 @@
       <div class="col-span-2 py-4 border-b border-gray-400">
         擁有者
       </div>
-      <div class="col-span-1 py-4 border-b border-gray-400">
-        更多
-      </div>
+      <div class="col-span-1 py-4 border-b border-gray-400" />
     </div>
     <slot />
   </div>

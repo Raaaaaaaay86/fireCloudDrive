@@ -8,16 +8,17 @@
       >
       <span class="cursor-pointer">
         {{ name }}
+        <i v-if="archive" class="fas fa-star text-yellow-500" />
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ lastUpdateTime }}
+        {{ lastUpdateTime | timestampToDate }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ size }}
+        {{ size | fileSize }}
       </span>
     </div>
     <div class="col-span-2 py-4">
@@ -38,7 +39,12 @@
       <li @click="downloadFile">
         下載
       </li>
-      <li>標示星號</li>
+      <li v-if="archive" @click="toggleArchiveFile">
+        移除星號
+      </li>
+      <li v-else @click="toggleArchiveFile">
+        標示星號
+      </li>
       <li @click.prevent="deleteFile(id)">
         刪除
       </li>
@@ -82,6 +88,11 @@ export default {
       required: false,
       default: 'undefined',
     },
+    archive: {
+      type: Boolean,
+      require: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -123,6 +134,13 @@ export default {
     },
     downloadFile() {
       window.open(this.downloadUrl, 'download');
+    },
+    toggleArchiveFile() {
+      const data = {
+        key: this.id,
+        archive: this.archive,
+      };
+      this.$store.dispatch('toggleArchive', data);
     },
   },
 };

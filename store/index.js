@@ -34,6 +34,7 @@ const actions = {
               updateTime: new Date().getTime(),
               key: pushRef.key,
               size,
+              archive: false,
             };
             context.commit('ADD_FILES_DATA', data);
             pushRef.set(data);
@@ -55,6 +56,13 @@ const actions = {
         context.commit('REMOVE_FILES_DATA', key);
       });
   },
+  toggleArchive(context, { key, archive }) {
+    database.ref(`files/${key}/archive`)
+      .set(!archive)
+      .then(() => {
+        context.commit('SET_FILES_ARCHIVE', { key, archive });
+      });
+  },
 };
 
 const mutations = {
@@ -71,11 +79,23 @@ const mutations = {
   REMOVE_FILES_DATA(state, key) {
     Vue.delete(state.fetchedFiles, key);
   },
+  SET_FILES_ARCHIVE(state, { key, archive }) {
+    state.fetchedFiles[key].archive = !archive;
+  },
 };
 
 const getters = {
   fetchedFiles(state) {
     return state.fetchedFiles;
+  },
+  archivedFiles(state) {
+    const data = {};
+    Object.keys(state.fetchedFiles).forEach((key) => {
+      if (state.fetchedFiles[key].archive) {
+        data[key] = state.fetchedFiles[key];
+      }
+    });
+    return data;
   },
 };
 

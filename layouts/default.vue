@@ -46,7 +46,7 @@
             我的檔案
           </span>
         </nuxt-link>
-        <nuxt-link to="/selected" class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500">
+        <nuxt-link to="/archives" class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500">
           <i class="far fa-star" />
           已加星號
         </nuxt-link>
@@ -90,7 +90,11 @@ export default {
   },
   methods: {
     onFileChange(e) {
-      this.$store.dispatch('uploadFile', e);
+      this.$store.dispatch('uploadFile', e)
+        .then(() => {
+          this.$router.push('/');
+          this.uploadList = false;
+        });
     },
     close(e) {
       if (!this.$refs.uploadButton.contains(e.target)) {

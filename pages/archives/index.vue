@@ -18,17 +18,19 @@
         <li>依擁有者</li>
       </ul>
     </div>
-    <FilesTable title="我的檔案" class="mb-8">
-      <FileInfo
-        v-for="file in fetchedFiles"
-        :id="file.key"
-        :key="file.key"
-        :name="file.fileName"
-        :size="file.size"
-        :last-update-time="file.updateTime"
-        :download-url="file.downloadURL"
-        :archive="file.archive"
-      />
+    <FilesTable title="已加星號" class="mb-8">
+      <template v-for="file in archivedFiles">
+        <div :key="file.key">
+          <FileInfo
+            :id="file.key"
+            :name="file.fileName"
+            :size="file.size"
+            :last-update-time="file.updateTime"
+            :download-url="file.downloadURL"
+            :archive="file.archive"
+          />
+        </div>
+      </template>
     </FilesTable>
   </div>
 </template>
@@ -51,7 +53,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['fetchedFiles']),
+    ...mapGetters(['archivedFiles']),
   },
   mounted() {
     document.addEventListener('click', this.close);
