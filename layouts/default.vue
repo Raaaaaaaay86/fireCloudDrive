@@ -90,7 +90,7 @@ export default {
   },
   methods: {
     onFileChange(e) {
-      this.$store.dispatch('storage/uploadFile', e);
+      this.$store.dispatch('uploadFile', e);
     },
     close(e) {
       if (!this.$refs.uploadButton.contains(e.target)) {
@@ -110,12 +110,15 @@ export default {
   font-weight: 600;
   min-width: 150px;
   margin-top: 16px;
-  padding: 16px;
+  padding: 16px 0 16px 0;
   left: 50%;
   transform: translatex(-50%);
   border-radius: 5px;
   ul li{
-    margin-bottom: 10px;
+    padding: 8px 16px 8px 16px;
+    &:active{
+      background-color: #e2e8f0;
+    }
   }
 }
 </style>

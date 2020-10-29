@@ -21,6 +21,7 @@
     <FilesTable title="我的檔案" class="mb-8">
       <FileInfo
         v-for="file in fetchedFiles"
+        :id="file.key"
         :key="file.key"
         :name="file.fileName"
         :size="file.size"

@@ -2,11 +2,11 @@
   <div class="grid grid-cols-12 text-gray-700 text-xl relative">
     <div class="col-span-5 py-4 pl-4 flex">
       <img
-        :src="require('@/assets/imgs/pdf@2x.png')"
+        :src="require(`@/assets/imgs/icon__${fileType}.png`)"
         alt="file-type-logo"
         class="mr-8"
       >
-      <span class="cursor-pointer" @click.prevent="deleteFile">
+      <span class="cursor-pointer">
         {{ name }}
       </span>
     </div>
@@ -37,7 +37,9 @@
     >
       <li>下載</li>
       <li>標示星號</li>
-      <li>刪除</li>
+      <li @click.prevent="deleteFile(id)">
+        刪除
+      </li>
       <li>移動</li>
     </ul>
   </div>
@@ -50,20 +52,28 @@ export default {
   props: {
     name: {
       type: String,
-      required: true,
+      required: false,
+      default: 'undefined',
     },
     lastUpdateTime: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     size: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
+    },
+    id: {
+      type: String,
+      required: false,
+      default: 'noKey',
     },
     author: {
       type: String,
       required: false,
-      default: 'undefinedUser',
+      default: 'undefined',
     },
   },
   data() {
@@ -73,6 +83,21 @@ export default {
   },
   computed: {
     ...mapGetters(['clickMenu/fileList']),
+    fileType() {
+      const imgReg = /^.*\.(jpg|JPG|gif|GIF|png|PNG|webp|WEBP)$/;
+      const pdfReg = /^.*\.(pdf|PDF)$/;
+      // const docReg = /^.*\.(doc|DOC|)$/;
+      let type = '';
+      if (this.name.match(imgReg)) {
+        type = 'img';
+      } else if (this.name.match(pdfReg)) {
+        type = 'pdf';
+      } else {
+        type = 'doc';
+      }
+
+      return type;
+    },
   },
   mounted() {
     document.addEventListener('click', this.close);
@@ -81,9 +106,8 @@ export default {
     document.removeEventListener('click', this.close);
   },
   methods: {
-    deleteFile() {
-      const key = '-MKi9Wa0s2tn4_Y0Cd0w';
-      this.$store.dispatch('storage/deleteFile', key);
+    deleteFile(id) {
+      this.$store.dispatch('deleteFile', id);
     },
     close(e) {
       if (!this.$el.contains(e.target)) {
@@ -109,6 +133,10 @@ export default {
   box-shadow: 0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05)!important;
   li {
     padding: 8px 16px 8px 16px;
+    cursor: pointer;
+    &:active{
+      background-color: #e2e8f0;
+    }
   }
 }
 </style>
