@@ -21,8 +21,8 @@
         <li>依擁有者</li>
       </ul>
     </div>
-    <FilesTable title="我的檔案" class="mb-8">
-      <template v-for="(prop, index) in fetchedFiles">
+    <FilesTable :title="`資料夾 (${folderName})`" class="mb-8">
+      <template v-for="(prop, index) in this['folder/folderfiles']">
         <div :key="prop.key">
           <FileInfo
             v-if="prop.type === 'file'"
@@ -61,13 +61,24 @@ export default {
     FileInfo,
     FolderInfo,
   },
+  middleware({ route, store }) {
+    const { path } = route.params;
+    const slashPath = path.split('-').join('/');
+    store.dispatch('updateCurrentPath', slashPath);
+    return store.dispatch('folder/fetchFolderFiles', { path });
+  },
   data() {
     return {
       sortList: false,
     };
   },
   computed: {
-    ...mapGetters(['fetchedFiles']),
+    ...mapGetters(['folder/folderfiles']),
+    folderName() {
+      const pathArray = this.$route.params.path.split('-');
+      const name = pathArray[pathArray.length - 1];
+      return name;
+    },
   },
   mounted() {
     document.addEventListener('click', this.close);

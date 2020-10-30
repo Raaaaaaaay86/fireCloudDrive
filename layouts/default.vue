@@ -25,7 +25,7 @@
               <i class="far fa-folder" />
               上傳資料夾
             </li>
-            <li>
+            <li @click.prevent="openModal">
               <i class="far fa-folder-open" />
               新資料夾
             </li>
@@ -95,6 +95,9 @@ export default {
           this.$router.push('/');
           this.uploadList = false;
         });
+    },
+    openModal() {
+      this.$store.dispatch('modal/open');
     },
     close(e) {
       if (!this.$refs.uploadButton.contains(e.target)) {

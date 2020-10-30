@@ -1,8 +1,8 @@
 <template>
-  <div class="grid grid-cols-12 text-gray-700 text-xl relative rounded hover:bg-blue-200">
+  <div class="grid grid-cols-12 text-gray-700 text-xl rounded relative hover:bg-blue-200">
     <div class="col-span-5 py-4 pl-4 flex cursor-pointer">
       <img
-        :src="require(`@/assets/imgs/icon__${fileType}.png`)"
+        :src="require(`@/assets/imgs/icon__folder.png`)"
         alt="file-type-logo"
         class="mr-8"
       >
@@ -36,8 +36,8 @@
       class="fileList"
       :class=" fileList ? 'block' : 'hidden' "
     >
-      <li @click="downloadFile">
-        下載
+      <li @click.prevent="toFile">
+        移動到 {{ name }}
       </li>
       <li v-if="archive" @click="toggleArchiveFile">
         移除星號
@@ -45,7 +45,7 @@
       <li v-else @click="toggleArchiveFile">
         標示星號
       </li>
-      <li @click.prevent="deleteFile(id)">
+      <li @click.prevent="deleteFolder()">
         刪除
       </li>
       <li>移動</li>
@@ -73,16 +73,6 @@ export default {
       required: false,
       default: 0,
     },
-    id: {
-      type: String,
-      required: false,
-      default: 'noKey',
-    },
-    downloadUrl: {
-      type: String,
-      required: false,
-      default: '/#',
-    },
     author: {
       type: String,
       required: false,
@@ -93,6 +83,11 @@ export default {
       require: false,
       default: false,
     },
+    path: {
+      type: String,
+      require: false,
+      default: 'unname',
+    },
   },
   data() {
     return {
@@ -101,21 +96,6 @@ export default {
   },
   computed: {
     ...mapGetters(['clickMenu/fileList']),
-    fileType() {
-      const imgReg = /^.*\.(jpg|JPG|gif|GIF|png|PNG|webp|WEBP)$/;
-      const pdfReg = /^.*\.(pdf|PDF)$/;
-      // const docReg = /^.*\.(doc|DOC|)$/;
-      let type = '';
-      if (this.name.match(imgReg)) {
-        type = 'img';
-      } else if (this.name.match(pdfReg)) {
-        type = 'pdf';
-      } else {
-        type = 'doc';
-      }
-
-      return type;
-    },
   },
   mounted() {
     document.addEventListener('click', this.close);
@@ -124,23 +104,27 @@ export default {
     document.removeEventListener('click', this.close);
   },
   methods: {
-    deleteFile(id) {
-      this.$store.dispatch('deleteFile', id);
+    deleteFolder() {
+      const vm = this;
+      const { name } = vm;
+      const dashPath = vm.path.split('/').join('-');
+      this.$store.dispatch('deleteFolder', { name, dashPath });
     },
     close(e) {
       if (!this.$el.contains(e.target)) {
         this.fileList = false;
       }
     },
-    downloadFile() {
-      window.open(this.downloadUrl, 'download');
-    },
     toggleArchiveFile() {
       const data = {
-        key: this.id,
+        path: this.path,
         archive: this.archive,
       };
-      this.$store.dispatch('toggleArchive', data);
+      this.$store.dispatch('toggleArchiveFolder', data);
+    },
+    toFile() {
+      const pathId = this.path.split('/').join('-');
+      this.$router.push(`/files/${pathId}`);
     },
   },
 };

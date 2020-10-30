@@ -19,15 +19,24 @@
       </ul>
     </div>
     <FilesTable title="已加星號" class="mb-8">
-      <template v-for="file in archivedFiles">
-        <div :key="file.key">
+      <template v-for="(prop, index) in archivedFiles">
+        <div :key="prop.key">
           <FileInfo
-            :id="file.key"
-            :name="file.fileName"
-            :size="file.size"
-            :last-update-time="file.updateTime"
-            :download-url="file.downloadURL"
-            :archive="file.archive"
+            v-if="prop.type === 'file'"
+            :id="prop.key"
+            :name="prop.fileName"
+            :size="prop.size"
+            :last-update-time="prop.updateTime"
+            :download-url="prop.downloadURL"
+            :archive="prop.archive"
+          />
+          <FolderInfo
+            v-if="prop.type === 'folder'"
+            :ref="`folder${index}`"
+            :name="prop.folderName"
+            :last-update-time="prop.updateTime"
+            :path="prop.path"
+            :archive="prop.archive"
           />
         </div>
       </template>

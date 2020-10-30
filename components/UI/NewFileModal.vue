@@ -10,7 +10,11 @@
         </h1>
         <i class="fas fa-times cursor-pointer" @click="closeModal" />
       </div>
-      <input type="text" class="h-12 w-full mb-4 bg-gray-300">
+      <input
+        v-model="newFolderName"
+        type="text"
+        class="h-12 w-full mb-4 bg-gray-300"
+      >
       <div style="pointer-events: auto;">
         <Button
           class="mr-2 border border-gray-600 cursor-pointer hover:bg-gray-600 hover:text-white"
@@ -18,7 +22,10 @@
         >
           取消
         </Button>
-        <Button class="bg-blue-400 text-white cursor-pointer">
+        <Button
+          class="bg-blue-400 text-white cursor-pointer"
+          @click.native.prevent="creatNewFolder"
+        >
           建立
         </Button>
       </div>
@@ -33,6 +40,11 @@ export default {
   components: {
     Button,
   },
+  data() {
+    return {
+      newFolderName: '',
+    };
+  },
   computed: {
     modalVisibility() {
       return this.$store.getters['modal/modalVisibility'];
@@ -40,6 +52,15 @@ export default {
   },
   methods: {
     closeModal() {
+      this.$store.dispatch('modal/close');
+    },
+    creatNewFolder() {
+      const vm = this;
+      const folderName = vm.newFolderName;
+      this.$store.dispatch('createNewFolder', { folderName })
+        .then(() => {
+          vm.newFolderName = '';
+        });
       this.$store.dispatch('modal/close');
     },
   },

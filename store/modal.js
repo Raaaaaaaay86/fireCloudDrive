@@ -5,8 +5,8 @@ const state = () => ({
 });
 
 const actions = {
-  open() {
-
+  open(context) {
+    context.commit('OPEN_MODAL');
   },
   close(context) {
     context.commit('CLOSE_MODAL');
@@ -14,6 +14,9 @@ const actions = {
 };
 
 const mutations = {
+  OPEN_MODAL(state) {
+    state.visible = true;
+  },
   CLOSE_MODAL(state) {
     state.visible = false;
   },

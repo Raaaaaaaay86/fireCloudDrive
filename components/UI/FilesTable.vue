@@ -5,7 +5,7 @@
         {{ title }}
       </h2>
     </div>
-    <div class="grid grid-cols-12 text-gray-800 text-xl font-bold">
+    <div class="mb-2 grid grid-cols-12 text-gray-800 text-xl font-bold">
       <div class="col-span-5 py-4 pl-4 border-b border-gray-400">
         名稱 ▼
       </div>
