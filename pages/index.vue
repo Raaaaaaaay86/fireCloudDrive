@@ -11,7 +11,6 @@
         @toggleSortList=" sortList = !sortList"
       />
       <ul
-        ref="iinput"
         class="sortList"
         :class=" sortList ? 'block' : 'hidden' "
       >
@@ -22,24 +21,15 @@
       </ul>
     </div>
     <FilesTable title="我的檔案" class="mb-8">
-      <template v-for="(prop, index) in fetchedFiles">
+      <template v-for="prop in fetchedFiles">
         <div :key="prop.key">
           <FileInfo
             v-if="prop.type === 'file'"
-            :id="prop.key"
-            :name="prop.fileName"
-            :size="prop.size"
-            :last-update-time="prop.updateTime"
-            :download-url="prop.downloadURL"
-            :archive="prop.archive"
+            :file="prop"
           />
           <FolderInfo
             v-if="prop.type === 'folder'"
-            :ref="`folder${index}`"
-            :name="prop.folderName"
-            :last-update-time="prop.updateTime"
-            :path="prop.path"
-            :archive="prop.archive"
+            :folder="prop"
           />
         </div>
       </template>
@@ -55,6 +45,9 @@ import FolderInfo from '@/components/UI/FolderInfo';
 import { mapGetters } from 'vuex';
 
 export default {
+  middleware({ store }) {
+    store.dispatch('updateCurrentPath', 'root');
+  },
   components: {
     SearchBar,
     FilesTable,

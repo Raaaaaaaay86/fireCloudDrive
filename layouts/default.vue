@@ -92,7 +92,6 @@ export default {
     onFileChange(e) {
       this.$store.dispatch('uploadFile', e)
         .then(() => {
-          this.$router.push('/');
           this.uploadList = false;
         });
     },

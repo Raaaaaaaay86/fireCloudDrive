@@ -7,23 +7,23 @@
         class="mr-8"
       >
       <span>
-        {{ name }}
-        <i v-if="archive" class="fas fa-star text-yellow-500" />
+        {{ folder.folderName }}
+        <i v-if="folder.archive" class="fas fa-star text-yellow-500" />
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ lastUpdateTime | timestampToDate }}
+        {{ folder.updateTime | timestampToDate }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ size | fileSize }}
+        {{ folder.size || 0 | fileSize }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ author }}
+        {{ folder.author || 'undefined' }}
       </span>
     </div>
     <div
@@ -37,9 +37,9 @@
       :class=" fileList ? 'block' : 'hidden' "
     >
       <li @click.prevent="toFile">
-        移動到 {{ name }}
+        移動到 {{ folder.folderName }}
       </li>
-      <li v-if="archive" @click="toggleArchiveFile">
+      <li v-if="folder.archive" @click="toggleArchiveFile">
         移除星號
       </li>
       <li v-else @click="toggleArchiveFile">
@@ -58,35 +58,9 @@ import { mapGetters } from 'vuex';
 
 export default {
   props: {
-    name: {
-      type: String,
-      required: false,
-      default: 'undefined',
-    },
-    lastUpdateTime: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    size: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    author: {
-      type: String,
-      required: false,
-      default: 'undefined',
-    },
-    archive: {
-      type: Boolean,
-      require: false,
-      default: false,
-    },
-    path: {
-      type: String,
-      require: false,
-      default: 'unname',
+    folder: {
+      type: Object,
+      required: true,
     },
   },
   data() {
@@ -107,23 +81,21 @@ export default {
     deleteFolder() {
       const vm = this;
       const { name } = vm;
-      const dashPath = vm.path.split('/').join('-');
-      this.$store.dispatch('deleteFolder', { name, dashPath });
+      this.$store.dispatch('deleteFolder', { name, path: vm.path });
     },
     close(e) {
+      const vm = this;
       if (!this.$el.contains(e.target)) {
-        this.fileList = false;
+        vm.fileList = false;
       }
     },
     toggleArchiveFile() {
-      const data = {
-        path: this.path,
-        archive: this.archive,
-      };
-      this.$store.dispatch('toggleArchiveFolder', data);
+      const vm = this;
+      this.$store.dispatch('toggleArchiveFolder', vm.folder);
     },
     toFile() {
-      const pathId = this.path.split('/').join('-');
+      const vm = this;
+      const pathId = vm.folder.path.replace(/\//g, '-');
       this.$router.push(`/files/${pathId}`);
     },
   },

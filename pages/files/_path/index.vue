@@ -11,7 +11,6 @@
         @toggleSortList=" sortList = !sortList"
       />
       <ul
-        ref="iinput"
         class="sortList"
         :class=" sortList ? 'block' : 'hidden' "
       >
@@ -22,24 +21,15 @@
       </ul>
     </div>
     <FilesTable :title="`資料夾 (${folderName})`" class="mb-8">
-      <template v-for="(prop, index) in this['folder/folderfiles']">
+      <template v-for="prop in pathFiles">
         <div :key="prop.key">
           <FileInfo
             v-if="prop.type === 'file'"
-            :id="prop.key"
-            :name="prop.fileName"
-            :size="prop.size"
-            :last-update-time="prop.updateTime"
-            :download-url="prop.downloadURL"
-            :archive="prop.archive"
+            :file="prop"
           />
           <FolderInfo
             v-if="prop.type === 'folder'"
-            :ref="`folder${index}`"
-            :name="prop.folderName"
-            :last-update-time="prop.updateTime"
-            :path="prop.path"
-            :archive="prop.archive"
+            :folder="prop"
           />
         </div>
       </template>
@@ -63,9 +53,9 @@ export default {
   },
   middleware({ route, store }) {
     const { path } = route.params;
-    const slashPath = path.split('-').join('/');
+    const slashPath = path.replace(/-/g, '/');
     store.dispatch('updateCurrentPath', slashPath);
-    return store.dispatch('folder/fetchFolderFiles', { path });
+    return store.dispatch('fetchPathFiles', { path });
   },
   data() {
     return {
@@ -73,7 +63,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['folder/folderfiles']),
+    ...mapGetters(['pathFiles']),
     folderName() {
       const pathArray = this.$route.params.path.split('-');
       const name = pathArray[pathArray.length - 1];

@@ -19,24 +19,15 @@
       </ul>
     </div>
     <FilesTable title="已加星號" class="mb-8">
-      <template v-for="(prop, index) in archivedFiles">
+      <template v-for="prop in archivedFiles">
         <div :key="prop.key">
           <FileInfo
             v-if="prop.type === 'file'"
-            :id="prop.key"
-            :name="prop.fileName"
-            :size="prop.size"
-            :last-update-time="prop.updateTime"
-            :download-url="prop.downloadURL"
-            :archive="prop.archive"
+            :file="prop"
           />
           <FolderInfo
             v-if="prop.type === 'folder'"
-            :ref="`folder${index}`"
-            :name="prop.folderName"
-            :last-update-time="prop.updateTime"
-            :path="prop.path"
-            :archive="prop.archive"
+            :folder="prop"
           />
         </div>
       </template>
@@ -55,6 +46,9 @@ export default {
     SearchBar,
     FilesTable,
     FileInfo,
+  },
+  middleware({ store }) {
+    return store.dispatch('fetchArchivedFiles');
   },
   data() {
     return {

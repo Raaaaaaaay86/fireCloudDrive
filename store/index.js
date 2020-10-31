@@ -4,8 +4,9 @@ import { storage, database } from '@/plugins/firebase';
 import Vue from 'vue';
 
 const state = () => ({
-  // eslint-disable-next-line no-new-object
   fetchedFiles: {},
+  pathFiles: {},
+  archivedFiles: {},
   currentPath: 'root',
 });
 
@@ -15,28 +16,38 @@ const actions = {
       vueContext.commit('SET_FILES_DATA', snap.val());
     });
   },
+  fetchPathFiles(context, { path }) {
+    return database.ref(path).once('value', (snap) => {
+      context.commit('SET_PATH_FILES', snap.val());
+    });
+  },
+  fetchArchivedFiles(context) {
+    console.log('fetch....');
+    return database.ref('archives').once('value', (snap) => {
+      context.commit('SET_ARCHIVE_DATA', snap.val());
+    });
+  },
   uploadFile(context, e) {
     if (e.target.files.length === 0) {
       return;
     }
     const file = e.target.files[0];
     const { size } = e.target.files[0];
-    const storageRef = storage.ref(`root/${file.name}`);
+    const { currentPath } = context.state;
+    const storageRef = storage.ref(`${currentPath}/${file.name}`);
 
     storageRef.put(file)
       .then(() => {
         storageRef.getDownloadURL()
           .then((snap) => {
-            let pushRef = database.ref(`${context.state.currentPath}`).push();
-            if (context.state.currentPath.includes('/')) {
-              const path = context.state.currentPath.split('/').join('-');
-              pushRef = database.ref(`${path}`).push();
-            }
+            const databaseRef = currentPath.replace(/\//g, '-');
+            const pushRef = database.ref(`${databaseRef}`).push();
+
             const data = {
               downloadURL: snap,
               type: 'file',
               fileName: file.name,
-              storagePath: `${context.state.currentPath}/${file.name}`,
+              storagePath: `${currentPath}/${file.name}`,
               updateTime: new Date().getTime(),
               key: pushRef.key,
               size,
@@ -63,15 +74,9 @@ const actions = {
         context.commit('REMOVE_FILES_DATA', key);
       });
   },
-  toggleArchive(context, { key, archive }) {
-    database.ref(`root/${key}/archive`)
-      .set(!archive)
-      .then(() => {
-        context.commit('SET_FILES_ARCHIVE', { key, archive });
-      });
-  },
   createNewFolder(context, { folderName }) {
     const { currentPath } = context.state;
+    const currentPathRef = currentPath.replace(/\//, '-');
     const data = {
       folderName,
       type: 'folder',
@@ -79,30 +84,57 @@ const actions = {
       updateTime: new Date().getTime(),
       archive: false,
     };
-    return database.ref(`root/${data.folderName}`)
+    return database.ref(`${currentPathRef}/${data.folderName}`)
       .set(data)
       .then(() => {
         context.commit('ADD_FOLDER_DATA', data);
-        const dashPath = data.path.split('/').join('-');
-        database.ref(`/${dashPath}/init`).set(true);
+        const newDatabaseRef = data.path.replace(/\//g, '-');
+        database.ref(`/${newDatabaseRef}/init`).set(true);
       });
   },
-  deleteFolder(context, { name, dashPath }) {
+  deleteFolder(context, { name, path }) {
+    const databasePathRef = path.replace(/\//g, '-');
     database.ref(`root/${name}`).remove()
       .then(() => {
         context.commit('REMOVE_FILES_DATA', name);
-        database.ref(dashPath).remove();
+        database.ref(databasePathRef).remove();
       });
   },
-  toggleArchiveFolder(context, { path, archive }) {
-    database.ref(`${path}/archive`)
+  toggleArchive(context, file) {
+    const databasePathRef = context.state.currentPath.replace(/\//g, '-');
+    const { key, archive } = file;
+
+    if (archive) {
+      database.ref(`archives/${key}`).remove();
+    } else {
+      database.ref(`archives/${key}`).set(file);
+    }
+
+    database.ref(`${databasePathRef}/${key}/archive`)
       .set(!archive)
       .then(() => {
-        context.commit('SET_FOLDER_ARCHIVE', { path, archive });
+        context.commit('SET_FILES_ARCHIVE', { key, archive });
+      });
+  },
+  toggleArchiveFolder(context, folder) {
+    const databasePathRef = context.state.currentPath.replace(/\//g, '-');
+    const { folderName, archive, path } = folder;
+    // Adding or removing the folder info in the DB(archives/)
+    if (archive) {
+      const databasePathRef = path.replace(/\//g, '-');
+      database.ref(`archives/${databasePathRef}`).remove();
+    } else {
+      const databasePathRef = path.replace(/\//g, '-');
+      database.ref(`archives/${databasePathRef}`).set(folder);
+    }
+    // Toggle the Archive value
+    database.ref(`${databasePathRef}/${folderName}/archive`)
+      .set(!archive)
+      .then(() => {
+        context.commit('SET_FOLDER_ARCHIVE', { folderName, archive });
       });
   },
   updateCurrentPath(context, newPath) {
-    console.log('newPath', newPath);
     context.commit('UPDATE_PATH', newPath);
   },
 };
@@ -111,30 +143,50 @@ const mutations = {
   SET_FILES_DATA(state, data) {
     state.fetchedFiles = data;
   },
-  ADD_FILES_DATA(state, data) {
-    if (!state.fetchedFiles) {
-      this.dispatch('nuxtServerInit');
-    } else {
-      Vue.set(state.fetchedFiles, data.key, data);
-    }
+  SET_PATH_FILES(state, data) {
+    state.pathFiles = data;
   },
-  ADD_FOLDER_DATA(state, data) {
+  SET_ARCHIVE_DATA(state, data) {
+    state.archivedFiles = data;
+  },
+  ADD_FILES_DATA(state, data) {
+    const currentPath = this.$router.app.$route.params.path || 'root';
+
     if (!state.fetchedFiles) {
       this.dispatch('nuxtServerInit');
+    } else if (currentPath === 'root') {
+      Vue.set(state.fetchedFiles, data.key, data);
     } else {
-      Vue.set(state.fetchedFiles, data.folderName, data);
+      Vue.set(state.pathFiles, data.key, data);
     }
   },
   REMOVE_FILES_DATA(state, key) {
     Vue.delete(state.fetchedFiles, key);
   },
   SET_FILES_ARCHIVE(state, { key, archive }) {
-    state.fetchedFiles[key].archive = !archive;
+    if (state.currentPath === 'root') {
+      state.fetchedFiles[key].archive = !archive;
+    } else {
+      state.pathFiles[key].archive = !archive;
+    }
   },
-  SET_FOLDER_ARCHIVE(state, { path, archive }) {
-    const pathArray = path.split('/');
-    const propName = pathArray[pathArray.length - 1];
-    state.fetchedFiles[propName].archive = !archive;
+  SET_FOLDER_ARCHIVE(state, { folderName, archive }) {
+    if (state.currentPath === 'root') {
+      state.fetchedFiles[folderName].archive = !archive;
+    } else {
+      state.pathFiles[folderName].archive = !archive;
+    }
+  },
+  ADD_FOLDER_DATA(state, data) {
+    const currentPath = this.$router.app.$route.params.path || 'root';
+
+    if (!state.fetchedFiles) {
+      this.dispatch('nuxtServerInit');
+    } else if (currentPath === 'root') {
+      Vue.set(state.fetchedFiles, data.folderName, data);
+    } else {
+      Vue.set(state.pathFiles, data.folderName, data);
+    }
   },
   UPDATE_PATH(state, newPath) {
     state.currentPath = newPath;
@@ -145,14 +197,11 @@ const getters = {
   fetchedFiles(state) {
     return state.fetchedFiles;
   },
+  pathFiles(state) {
+    return state.pathFiles;
+  },
   archivedFiles(state) {
-    const data = {};
-    Object.keys(state.fetchedFiles).forEach((key) => {
-      if (state.fetchedFiles[key].archive) {
-        data[key] = state.fetchedFiles[key];
-      }
-    });
-    return data;
+    return state.archivedFiles;
   },
 };
 

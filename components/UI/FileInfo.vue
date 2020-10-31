@@ -7,23 +7,23 @@
         class="mr-8"
       >
       <span>
-        {{ name }}
-        <i v-if="archive" class="fas fa-star text-yellow-500" />
+        {{ file.fileName }}
+        <i v-if="file.archive" class="fas fa-star text-yellow-500" />
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ lastUpdateTime | timestampToDate }}
+        {{ file.updateTime | timestampToDate }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ size | fileSize }}
+        {{ file.size | fileSize }}
       </span>
     </div>
     <div class="col-span-2 py-4">
       <span>
-        {{ author }}
+        {{ file.author || 'undefined' }}
       </span>
     </div>
     <div
@@ -39,7 +39,7 @@
       <li @click="downloadFile">
         下載
       </li>
-      <li v-if="archive" @click="toggleArchiveFile">
+      <li v-if="file.archive" @click="toggleArchiveFile">
         移除星號
       </li>
       <li v-else @click="toggleArchiveFile">
@@ -58,40 +58,9 @@ import { mapGetters } from 'vuex';
 
 export default {
   props: {
-    name: {
-      type: String,
-      required: false,
-      default: 'undefined',
-    },
-    lastUpdateTime: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    size: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    id: {
-      type: String,
-      required: false,
-      default: 'noKey',
-    },
-    downloadUrl: {
-      type: String,
-      required: false,
-      default: '/#',
-    },
-    author: {
-      type: String,
-      required: false,
-      default: 'undefined',
-    },
-    archive: {
-      type: Boolean,
-      require: false,
-      default: false,
+    file: {
+      type: Object,
+      required: true,
     },
   },
   data() {
@@ -104,11 +73,15 @@ export default {
     fileType() {
       const imgReg = /^.*\.(jpg|JPG|gif|GIF|png|PNG|webp|WEBP)$/;
       const pdfReg = /^.*\.(pdf|PDF)$/;
-      // const docReg = /^.*\.(doc|DOC|)$/;
       let type = '';
-      if (this.name.match(imgReg)) {
+
+      if (!this.file) {
+        return type;
+      }
+
+      if (this.file.fileName.match(imgReg)) {
         type = 'img';
-      } else if (this.name.match(pdfReg)) {
+      } else if (this.file.fileName.match(pdfReg)) {
         type = 'pdf';
       } else {
         type = 'doc';
@@ -133,14 +106,10 @@ export default {
       }
     },
     downloadFile() {
-      window.open(this.downloadUrl, 'download');
+      window.open(this.file.downloadURL, 'download');
     },
     toggleArchiveFile() {
-      const data = {
-        key: this.id,
-        archive: this.archive,
-      };
-      this.$store.dispatch('toggleArchive', data);
+      this.$store.dispatch('toggleArchive', this.file);
     },
   },
 };
