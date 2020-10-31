@@ -100,10 +100,13 @@ const actions = {
       });
   },
   toggleArchive(context, file) {
-    const databasePathRef = context.state.currentPath.replace(/\//g, '-');
-    const { key, archive } = file;
+    // const databasePathRef = context.state.currentPath.replace(/\//g, '-');
+    const { key, archive, storagePath } = file;
+    const storagePathArray = storagePath.split('/');
+    storagePathArray.pop();
+    const path = storagePathArray.join('-');
 
-    database.ref(`${databasePathRef}/${key}/archive`)
+    database.ref(`${path}/${key}/archive`)
       .set(!archive)
       .then(() => {
         context.commit('SET_FILES_ARCHIVE', { key, archive });
@@ -119,10 +122,9 @@ const actions = {
     }
   },
   toggleArchiveFolder(context, folder) {
-    const databasePathRef = context.state.currentPath.replace(/\//g, '-');
     const { folderName, archive, path } = folder;
-    // Toggle the Archive value
-    database.ref(`${databasePathRef}/${folderName}/archive`)
+    // Toggle the Archive value of Database
+    database.ref(`${path}/archive`)
       .set(!archive)
       .then(() => {
         context.commit('SET_FOLDER_ARCHIVE', { folderName, archive });
@@ -155,7 +157,12 @@ const mutations = {
     state.archivedFiles = data;
   },
   REMOVE_LOCAL_ARCHIVE(state, { key }) {
-    Vue.delete(state.archivedFiles, key);
+    if (!state.archivedFiles) {
+      return;
+    }
+    if (state.archivedFiles[key]) {
+      Vue.delete(state.archivedFiles, key);
+    }
   },
   ADD_FILES_DATA(state, data) {
     const currentPath = this.$router.app.$route.params.path || 'root';
