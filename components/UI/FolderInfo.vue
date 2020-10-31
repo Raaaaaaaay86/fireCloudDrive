@@ -1,5 +1,8 @@
 <template>
-  <div class="grid grid-cols-12 text-gray-700 text-xl rounded relative hover:bg-blue-200">
+  <div
+    class="grid grid-cols-12 text-gray-700 text-xl rounded relative hover:bg-blue-200"
+    @dblclick.prevent="toFile"
+  >
     <div class="col-span-5 py-4 pl-4 flex cursor-pointer">
       <img
         :src="require(`@/assets/imgs/icon__folder.png`)"

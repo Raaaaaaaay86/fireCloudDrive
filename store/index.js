@@ -46,6 +46,7 @@ const actions = {
               downloadURL: snap,
               type: 'file',
               fileName: file.name,
+              name: file.name,
               storagePath: `${currentPath}/${file.name}`,
               path: currentPath,
               updateTime: new Date().getTime(),
@@ -63,6 +64,7 @@ const actions = {
     const currentPathRef = currentPath.replace(/\//, '-');
     const data = {
       folderName,
+      name: folderName,
       type: 'folder',
       path: `${currentPath}/${folderName}`,
       updateTime: new Date().getTime(),

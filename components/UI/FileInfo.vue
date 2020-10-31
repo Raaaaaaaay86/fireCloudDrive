@@ -1,5 +1,8 @@
 <template>
-  <div class="grid grid-cols-12 text-gray-700 text-xl relative rounded hover:bg-blue-200">
+  <div
+    class="grid grid-cols-12 text-gray-700 text-xl relative rounded hover:bg-blue-200"
+    @dblclick.prevent="downloadFile"
+  >
     <div class="col-span-5 py-4 pl-4 flex cursor-pointer">
       <img
         :src="require(`@/assets/imgs/icon__${fileType}.png`)"
