@@ -22,7 +22,6 @@ const actions = {
     });
   },
   fetchArchivedFiles(context) {
-    console.log('fetch....');
     return database.ref('archives').once('value', (snap) => {
       context.commit('SET_ARCHIVE_DATA', snap.val());
     });
@@ -104,35 +103,41 @@ const actions = {
     const databasePathRef = context.state.currentPath.replace(/\//g, '-');
     const { key, archive } = file;
 
-    if (archive) {
-      database.ref(`archives/${key}`).remove();
-    } else {
-      database.ref(`archives/${key}`).set(file);
-    }
-
     database.ref(`${databasePathRef}/${key}/archive`)
       .set(!archive)
       .then(() => {
         context.commit('SET_FILES_ARCHIVE', { key, archive });
       });
+
+    if (archive) {
+      database.ref(`archives/${key}`).remove();
+      context.commit('REMOVE_LOCAL_ARCHIVE', { key });
+    } else {
+      const uploadFile = { ...file };
+      uploadFile.archive = true;
+      database.ref(`archives/${key}`).set(uploadFile);
+    }
   },
   toggleArchiveFolder(context, folder) {
     const databasePathRef = context.state.currentPath.replace(/\//g, '-');
     const { folderName, archive, path } = folder;
-    // Adding or removing the folder info in the DB(archives/)
-    if (archive) {
-      const databasePathRef = path.replace(/\//g, '-');
-      database.ref(`archives/${databasePathRef}`).remove();
-    } else {
-      const databasePathRef = path.replace(/\//g, '-');
-      database.ref(`archives/${databasePathRef}`).set(folder);
-    }
     // Toggle the Archive value
     database.ref(`${databasePathRef}/${folderName}/archive`)
       .set(!archive)
       .then(() => {
         context.commit('SET_FOLDER_ARCHIVE', { folderName, archive });
       });
+    // Adding or removing the folder info in the DB(archives/)
+    if (archive) {
+      const databaseArchivePathRef = path.replace(/\//g, '-');
+      database.ref(`archives/${databaseArchivePathRef}`).remove();
+      context.commit('REMOVE_LOCAL_ARCHIVE', { key: databaseArchivePathRef });
+    } else {
+      const databaseArchivePathRef = path.replace(/\//g, '-');
+      const uploadFolder = { ...folder };
+      uploadFolder.archive = true;
+      database.ref(`archives/${databaseArchivePathRef}`).set(uploadFolder);
+    }
   },
   updateCurrentPath(context, newPath) {
     context.commit('UPDATE_PATH', newPath);
@@ -148,6 +153,9 @@ const mutations = {
   },
   SET_ARCHIVE_DATA(state, data) {
     state.archivedFiles = data;
+  },
+  REMOVE_LOCAL_ARCHIVE(state, { key }) {
+    Vue.delete(state.archivedFiles, key);
   },
   ADD_FILES_DATA(state, data) {
     const currentPath = this.$router.app.$route.params.path || 'root';
