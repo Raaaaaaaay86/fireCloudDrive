@@ -30,18 +30,18 @@ const actions = {
     if (e.target.files.length === 0) {
       return;
     }
+
     const file = e.target.files[0];
     const { size } = e.target.files[0];
     const { currentPath } = context.state;
     const storageRef = storage.ref(`${currentPath}/${file.name}`);
+    const databaseRef = currentPath.replace(/\//g, '-');
 
     storageRef.put(file)
       .then(() => {
         storageRef.getDownloadURL()
           .then((snap) => {
-            const databaseRef = currentPath.replace(/\//g, '-');
             const pushRef = database.ref(`${databaseRef}`).push();
-
             const data = {
               downloadURL: snap,
               type: 'file',
@@ -54,6 +54,7 @@ const actions = {
               size,
               archive: false,
             };
+
             context.commit('ADD_FILES_DATA', data);
             pushRef.set(data);
           });
@@ -70,6 +71,7 @@ const actions = {
       updateTime: new Date().getTime(),
       archive: false,
     };
+
     return database.ref(`${currentPathRef}/${data.folderName}`)
       .set(data)
       .then(() => {
@@ -92,6 +94,7 @@ const actions = {
   deleteFolder(context, folder) {
     const { path, folderName } = folder;
     const databasePathRef = path.replace(/\//g, '-');
+
     database.ref(path).remove()
       .then(() => {
         context.commit('REMOVE_FILES_DATA', folderName);
@@ -221,6 +224,49 @@ const getters = {
   },
   archivedFiles(state) {
     return state.archivedFiles;
+  },
+  rootFileNames(state) {
+    const fileNames = [];
+    Object.keys(state.fetchedFiles)
+      .forEach((key) => {
+        if (state.fetchedFiles[key].type === 'file') {
+          fileNames.push(state.fetchedFiles[key].fileName);
+        }
+      });
+    return fileNames;
+  },
+  rootFolderNames(state) {
+    const folderNames = [];
+    Object.keys(state.fetchedFiles)
+      .forEach((key) => {
+        if (state.fetchedFiles[key].type === 'folder') {
+          folderNames.push(state.fetchedFiles[key].folderName);
+        }
+      });
+    return folderNames;
+  },
+  pathFileNames(state) {
+    const fileNames = [];
+    Object.keys(state.pathFiles)
+      .forEach((key) => {
+        if (state.pathFiles[key].type === 'file') {
+          fileNames.push(state.pathFiles[key].fileName);
+        }
+      });
+    return fileNames;
+  },
+  pathFolderNames(state) {
+    const folderNames = [];
+    Object.keys(state.pathFiles)
+      .forEach((key) => {
+        if (state.pathFiles[key].type === 'folder') {
+          folderNames.push(state.pathFiles[key].folderName);
+        }
+      });
+    return folderNames;
+  },
+  currentPath(state) {
+    return state.currentPath;
   },
 };
 

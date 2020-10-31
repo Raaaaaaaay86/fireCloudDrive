@@ -42,7 +42,6 @@ import SearchBar from '@/components/UI/SearchBar';
 import FilesTable from '@/components/UI/FilesTable';
 import FileInfo from '@/components/UI/FileInfo';
 import FolderInfo from '@/components/UI/FolderInfo';
-import { mapGetters } from 'vuex';
 
 export default {
   middleware({ store }) {
@@ -60,7 +59,15 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['fetchedFiles']),
+    fetchedFiles() {
+      const data = { ...this.$store.getters.fetchedFiles };
+      const dataArray = [];
+      Object.keys(data).forEach((el) => {
+        dataArray.push(data[el]);
+      });
+      dataArray.sort((a, b) => a.size - b.size);
+      return dataArray;
+    },
   },
   mounted() {
     document.addEventListener('click', this.close);

@@ -82,6 +82,20 @@ export default {
       uploadList: false,
     };
   },
+  computed: {
+    rootFileNames() {
+      return this.$store.getters.rootFileNames;
+    },
+    pathFileNames() {
+      return this.$store.getters.pathFileNames;
+    },
+    rootFolderNames() {
+      return this.$store.getters.rootFolderNames;
+    },
+    currentPath() {
+      return this.$store.getters.currentPath;
+    },
+  },
   mounted() {
     document.addEventListener('click', this.close);
   },
@@ -90,7 +104,17 @@ export default {
   },
   methods: {
     onFileChange(e) {
-      this.$store.dispatch('uploadFile', e)
+      const vm = this;
+      const { name } = e.target.files[0];
+
+      if (vm.rootFileNames.includes(name) && vm.currentPath === 'root') {
+        return alert('檔名已存在');
+      }
+      if (vm.pathFileNames.includes(name) && vm.currentPath !== 'root') {
+        return alert('檔名已存在');
+      }
+
+      return this.$store.dispatch('uploadFile', e)
         .then(() => {
           this.uploadList = false;
         });
