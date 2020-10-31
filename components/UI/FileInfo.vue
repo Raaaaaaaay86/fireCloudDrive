@@ -45,7 +45,7 @@
       <li v-else @click="toggleArchiveFile">
         標示星號
       </li>
-      <li @click.prevent="deleteFile(id)">
+      <li @click.prevent="deleteFile">
         刪除
       </li>
       <li>移動</li>
@@ -97,8 +97,9 @@ export default {
     document.removeEventListener('click', this.close);
   },
   methods: {
-    deleteFile(id) {
-      this.$store.dispatch('deleteFile', id);
+    deleteFile() {
+      const vm = this;
+      this.$store.dispatch('deleteFile', vm.file);
     },
     close(e) {
       if (!this.$el.contains(e.target)) {

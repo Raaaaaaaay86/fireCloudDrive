@@ -45,7 +45,7 @@
       <li v-else @click="toggleArchiveFile">
         標示星號
       </li>
-      <li @click.prevent="deleteFolder()">
+      <li @click.prevent="deleteFolder">
         刪除
       </li>
       <li>移動</li>
@@ -80,8 +80,7 @@ export default {
   methods: {
     deleteFolder() {
       const vm = this;
-      const { name } = vm;
-      this.$store.dispatch('deleteFolder', { name, path: vm.path });
+      this.$store.dispatch('deleteFolder', vm.folder);
     },
     close(e) {
       const vm = this;

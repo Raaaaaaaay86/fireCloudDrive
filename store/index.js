@@ -47,6 +47,7 @@ const actions = {
               type: 'file',
               fileName: file.name,
               storagePath: `${currentPath}/${file.name}`,
+              path: currentPath,
               updateTime: new Date().getTime(),
               key: pushRef.key,
               size,
@@ -55,22 +56,6 @@ const actions = {
             context.commit('ADD_FILES_DATA', data);
             pushRef.set(data);
           });
-      });
-  },
-  deleteFile(context, key) {
-    const storageRef = storage.ref();
-    database.ref(`${context.state.currentPath.replace(/\//g, '-')}/${key}`)
-      .once('value', (snap) => snap)
-      .then((snap) => {
-        const { storagePath, key } = snap.val();
-        storageRef.child(storagePath)
-          .delete()
-          .then(() => {
-            database.ref(`root/${key}`).remove();
-          });
-      })
-      .then(() => {
-        context.commit('REMOVE_FILES_DATA', key);
       });
   },
   createNewFolder(context, { folderName }) {
@@ -91,12 +76,24 @@ const actions = {
         database.ref(`/${newDatabaseRef}/init`).set(true);
       });
   },
-  deleteFolder(context, { name, path }) {
+  deleteFile(context, file) {
+    const storageRef = storage.ref();
+    const { path, storagePath, key } = file;
     const databasePathRef = path.replace(/\//g, '-');
-    database.ref(`root/${name}`).remove()
+
+    database.ref(`${databasePathRef}/${key}`).remove()
       .then(() => {
-        context.commit('REMOVE_FILES_DATA', name);
-        database.ref(databasePathRef).remove();
+        storageRef.child(storagePath).delete();
+        context.commit('REMOVE_FILES_DATA', key);
+      });
+  },
+  deleteFolder(context, folder) {
+    const { path, folderName } = folder;
+    const databasePathRef = path.replace(/\//g, '-');
+    database.ref(path).remove()
+      .then(() => {
+        context.commit('REMOVE_FILES_DATA', folderName);
+        database.ref(`${databasePathRef}`).remove();
       });
   },
   toggleArchive(context, file) {
@@ -176,7 +173,12 @@ const mutations = {
     }
   },
   REMOVE_FILES_DATA(state, key) {
-    Vue.delete(state.fetchedFiles, key);
+    const currentPath = this.$router.app.$route.params.path || 'root';
+    if (currentPath === 'root') {
+      Vue.delete(state.fetchedFiles, key);
+    } else {
+      Vue.delete(state.pathFiles, key);
+    }
   },
   SET_FILES_ARCHIVE(state, { key, archive }) {
     if (state.currentPath === 'root') {

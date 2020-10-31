@@ -21,8 +21,8 @@
       </ul>
     </div>
     <FilesTable title="我的檔案" class="mb-8">
-      <template v-for="prop in fetchedFiles">
-        <div :key="prop.key">
+      <template v-for="(prop, index) in fetchedFiles">
+        <div :key="index">
           <FileInfo
             v-if="prop.type === 'file'"
             :file="prop"
