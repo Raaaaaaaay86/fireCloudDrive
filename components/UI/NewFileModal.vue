@@ -35,6 +35,7 @@
 
 <script>
 import Button from '@/components/UI/Button';
+import { mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -49,6 +50,7 @@ export default {
     modalVisibility() {
       return this.$store.getters['modal/modalVisibility'];
     },
+    ...mapGetters(['rootFolderNames', 'pathFolderNames', 'currentPath']),
   },
   methods: {
     closeModal() {
@@ -57,11 +59,19 @@ export default {
     creatNewFolder() {
       const vm = this;
       const folderName = vm.newFolderName;
+
+      if (vm.rootFolderNames.includes(folderName) && vm.currentPath === 'root') {
+        return alert('資料夾已存在');
+      }
+      if (vm.pathFolderNames.includes(folderName) && vm.currentPath !== 'root') {
+        return alert('資料夾已存在');
+      }
+
       this.$store.dispatch('createNewFolder', { folderName })
         .then(() => {
           vm.newFolderName = '';
         });
-      this.$store.dispatch('modal/close');
+      return this.$store.dispatch('modal/close');
     },
   },
 };
