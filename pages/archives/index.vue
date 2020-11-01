@@ -12,10 +12,30 @@
         class="sortList"
         :class=" sortList ? 'block' : 'hidden' "
       >
-        <li>依上傳時間</li>
-        <li>依修改時間</li>
-        <li>依檔案大小</li>
-        <li>依擁有者</li>
+        <li @click.prevent="sortMethod = 'nameAscending'; sortList = !sortList">
+          依檔案名稱(A > Z)
+        </li>
+        <li @click.prevent="sortMethod = 'nameDescending'; sortList = !sortList">
+          依檔案名稱(Z > A)
+        </li>
+        <li @click.prevent="sortMethod = 'updateTimeAscending'; sortList = !sortList">
+          依上傳時間(新 > 舊)
+        </li>
+        <li @click.prevent="sortMethod = 'updateTimeDescending'; sortList = !sortList">
+          依上傳時間(舊 > 新)
+        </li>
+        <li @click.prevent="sortMethod = 'sizeAscending'; sortList = !sortList">
+          依檔案大小(小 > 大)
+        </li>
+        <li @click.prevent="sortMethod = 'sizeDescending'; sortList = !sortList">
+          依檔案大小(大 > 小)
+        </li>
+        <li @click.prevent="sortMethod = 'authorAscending'; sortList = !sortList">
+          依擁有者 (A > Z)
+        </li>
+        <li @click.prevent="sortMethod = 'authorDescending'; sortList = !sortList">
+          依擁有者 (Z > A)
+        </li>
       </ul>
     </div>
     <FilesTable title="已加星號" class="mb-8">
@@ -39,7 +59,6 @@
 import SearchBar from '@/components/UI/SearchBar';
 import FilesTable from '@/components/UI/FilesTable';
 import FileInfo from '@/components/UI/FileInfo';
-import { mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -53,10 +72,39 @@ export default {
   data() {
     return {
       sortList: false,
+      sortMethod: 'typeDescending',
     };
   },
   computed: {
-    ...mapGetters(['archivedFiles']),
+    archivedFiles() {
+      const vm = this;
+      const data = { ...this.$store.getters.archivedFiles };
+      const dataArray = [];
+      Object.keys(data).forEach((key) => {
+        dataArray.push(data[key]);
+      });
+      // to change sort condition if vm.sortMethod changed.
+      if (vm.sortMethod === 'updateTimeAscending') {
+        dataArray.sort((a, b) => b.updateTime - a.updateTime);
+      } else if (vm.sortMethod === 'updateTimeDescending') {
+        dataArray.sort((a, b) => a.updateTime - b.updateTime);
+      } else if (vm.sortMethod === 'sizeAscending') {
+        dataArray.sort((a, b) => a.size - b.size);
+      } else if (vm.sortMethod === 'sizeDescending') {
+        dataArray.sort((a, b) => b.size - a.size);
+      } else if (vm.sortMethod === 'authorAscending') {
+        dataArray.sort((a, b) => a.author - b.author);
+      } else if (vm.sortMethod === 'authorDescending') {
+        dataArray.sort((a, b) => b.author - a.author);
+      } else if (vm.sortMethod === 'nameAscending') {
+        dataArray.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (vm.sortMethod === 'nameDescending') {
+        dataArray.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (vm.sortMethod === 'typeDescending') {
+        dataArray.sort((a, b) => a.type - b.type);
+      }
+      return dataArray;
+    },
   },
   mounted() {
     document.addEventListener('click', this.close);

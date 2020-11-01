@@ -59,19 +59,19 @@ export default {
     creatNewFolder() {
       const vm = this;
       const folderName = vm.newFolderName;
-
+      // If folderName is already existed in the current path, would return alert.
       if (vm.rootFolderNames.includes(folderName) && vm.currentPath === 'root') {
         return alert('資料夾已存在');
       }
       if (vm.pathFolderNames.includes(folderName) && vm.currentPath !== 'root') {
         return alert('資料夾已存在');
       }
-
+      // Sending the CreateNewFolder request.
       this.$store.dispatch('createNewFolder', { folderName })
         .then(() => {
-          vm.newFolderName = '';
+          vm.newFolderName = ''; // If succeed, clear the modal input.
         });
-      return this.$store.dispatch('modal/close');
+      return this.$store.dispatch('modal/close'); // Close the modal
     },
   },
 };

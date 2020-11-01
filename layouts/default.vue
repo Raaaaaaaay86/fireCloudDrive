@@ -106,17 +106,17 @@ export default {
     onFileChange(e) {
       const vm = this;
       const { name } = e.target.files[0];
-
+      // If fileName is already existed in the current path, would return alert.
       if (vm.rootFileNames.includes(name) && vm.currentPath === 'root') {
         return alert('檔名已存在');
       }
       if (vm.pathFileNames.includes(name) && vm.currentPath !== 'root') {
         return alert('檔名已存在');
       }
-
+      // Sending the CreateNewFile request.
       return this.$store.dispatch('uploadFile', e)
         .then(() => {
-          this.uploadList = false;
+          this.uploadList = false; // Close the dropdown list.
         });
     },
     openModal() {
