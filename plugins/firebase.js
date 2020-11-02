@@ -1,6 +1,7 @@
 import Firebase from 'firebase/app';
 import 'firebase/storage';
 import 'firebase/database';
+import 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.SDK_APIKEY,
@@ -21,5 +22,23 @@ if (!firebase.apps.length) {
 
 const database = firebase.database();
 const storage = firebase.storage();
+const auth = firebase.auth();
 
-export { storage, database };
+if (process.client) {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log('stateChange: LoggedIn');
+      auth.app.currentUser = user;
+    } else {
+      console.log('stateChange: LoggedOut');
+      auth.app.currentUser = null;
+    }
+  });
+}
+
+export {
+  storage,
+  database,
+  auth,
+  firebase,
+};

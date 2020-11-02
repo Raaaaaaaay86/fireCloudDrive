@@ -53,11 +53,14 @@
         <!--<div class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500">
           <i class="far fa-share-square" />
           檔案共享
-        </div>
-        <div class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500">
+        </div>-->
+        <div
+          class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500"
+          @click="signOut"
+        >
           <i class="far fa-trash-alt" />
-          垃圾桶
-        </ㄋdiv>-->
+          登出
+        </div>
       </div>
       <UserInfo />
     </div>
@@ -73,6 +76,7 @@ import UserInfo from '@/components/UI/UserInfo';
 import NewFileModal from '@/components/UI/NewFileModal';
 
 export default {
+  middleware: ['checkAuthState', 'checkAuthClient'],
   components: {
     UserInfo,
     NewFileModal,
@@ -126,6 +130,10 @@ export default {
       if (!this.$refs.uploadButton.contains(e.target)) {
         this.uploadList = false;
       }
+    },
+    async signOut() {
+      await this.$store.dispatch('auth/logOut');
+      this.$router.push('/login');
     },
   },
 };

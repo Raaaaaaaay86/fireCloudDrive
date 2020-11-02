@@ -1,3 +1,6 @@
+import express from 'express';
+import session from 'express-session';
+
 export default {
   // Global page headers (https://go.nuxtjs.dev/config-head)
   head: {
@@ -41,10 +44,22 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    '@nuxtjs/proxy',
   ],
-
+  proxy: {
+    '/api': {
+      target: 'http://localhost:3000',
+      pathRewrite: {
+        '^/api': '/',
+      },
+    },
+  },
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
-  axios: {},
+  axios: {
+    proxy: true,
+    baseURL: 'http://localhost:3000',
+    credentials: true,
+  },
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
@@ -60,4 +75,19 @@ export default {
     SDK_APPID: '1:856072363107:web:58d82817bf9ae57fbd6c56',
     SDK_MEASUREMENTID: 'G-5CX3L16TQW',
   },
+
+  router: {
+    middleware: ['checkAuthState', 'checkAuthClient'],
+  },
+
+  serverMiddleware: [
+    express.json(),
+    session({
+      secret: 'rayray4real',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { maxAge: 60000, secure: false },
+    }),
+    '~/api',
+  ],
 };
