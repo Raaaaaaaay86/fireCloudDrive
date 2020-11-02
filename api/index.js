@@ -1,9 +1,12 @@
 /* eslint-disable no-console */
 const express = require('express');
+const admin = require('./connection/firebaseAdmin');
 
 // eslint-disable-next-line no-unused-vars
 // eslint-disable-next-line unicorn/escape-case
 const RED = '\x1b[31m %s';
+// eslint-disable-next-line unicorn/escape-case
+const GREEN = '\x1b[32m';
 const app = express();
 const router = express.Router();
 router.use((req, res, next) => {
@@ -20,9 +23,9 @@ router.post('/login', (req, res) => {
     const { uid, token } = req.body;
     req.session.uid = uid;
     res.cookie('access_token', token, { maxAge: 3600000, httpOnly: true });
-    res.json({ status: 200 });
+    res.json({ success: true });
   } catch (err) {
-    console.log(RED, err);
+    res.json({ success: false });
   }
 });
 
@@ -31,9 +34,24 @@ router.post('/logout', (req, res) => {
     console.log('[API] - LOGOUT POST');
     delete req.session.uid;
     res.clearCookie('access_token');
-    res.json({ status: 200 });
+    res.json({ success: true });
   } catch (error) {
-    console.log(RED, error);
+    res.json({ success: false });
+  }
+});
+
+router.post('/checkAuth', async (req, res) => {
+  try {
+    const token = req.headers.cookie
+      .split(';')
+      .find((c) => c.trim().startsWith('access_token='))
+      .split('=')[1];
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    if (decodedToken) console.log(GREEN, 'PASS');
+    res.json({ success: true });
+  } catch {
+    console.log(RED, 'response: Auth Failed');
+    res.json({ success: false });
   }
 });
 

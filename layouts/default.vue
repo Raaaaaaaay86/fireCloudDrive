@@ -76,7 +76,7 @@ import UserInfo from '@/components/UI/UserInfo';
 import NewFileModal from '@/components/UI/NewFileModal';
 
 export default {
-  middleware: ['checkAuthState', 'checkAuthClient'],
+  middleware: ['checkbyServer'],
   components: {
     UserInfo,
     NewFileModal,

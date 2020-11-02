@@ -77,7 +77,6 @@ export default {
   },
 
   router: {
-    middleware: ['checkAuthState', 'checkAuthClient'],
   },
 
   serverMiddleware: [

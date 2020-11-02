@@ -1,4 +1,3 @@
-/* eslint-disable */
 import jwtDecode from 'jwt-decode';
 
 const getUIDFromSession = (req) => {
@@ -23,10 +22,10 @@ const getUserFromCookie = (req) => {
     return;
   }
 
+  // eslint-disable-next-line consistent-return
   return decodedToken.sub;
 };
 
-// eslint-disable-next-line func-names
 export default function ({ store, req, redirect }) {
   if (process.server) {
     let uid = getUIDFromSession(req);
