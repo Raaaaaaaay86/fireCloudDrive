@@ -48,10 +48,10 @@ router.post('/checkAuth', async (req, res) => {
       .split('=')[1];
     const decodedToken = await admin.auth().verifyIdToken(token);
     if (decodedToken) console.log(GREEN, 'PASS');
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch {
     console.log(RED, 'response: Auth Failed');
-    res.json({ success: false });
+    return res.json({ success: false });
   }
 });
 
