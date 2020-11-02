@@ -29,16 +29,12 @@ export default {
     };
   },
   methods: {
-    logIn() {
+    async logIn() {
       const vm = this;
       const { email, password } = vm;
-      this.$store.dispatch('auth/logIn', { email, password })
-        .then(() => {
-          this.$router.push('/');
-        })
-        .catch((err) => {
-          alert(err);
-        });
+      return this.$store.dispatch('auth/logIn', { email, password })
+        .then(() => this.$router.push('/'))
+        .catch((err) => alert(err));
     },
   },
 };

@@ -50,10 +50,6 @@
           <i class="far fa-star" />
           已加星號
         </nuxt-link>
-        <!--<div class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500">
-          <i class="far fa-share-square" />
-          檔案共享
-        </div>-->
         <div
           class="w-full text-center mb-6 cursor-pointer rounded hover:bg-blue-500"
           @click="signOut"

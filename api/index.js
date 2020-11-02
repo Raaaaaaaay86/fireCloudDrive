@@ -1,11 +1,9 @@
+/* eslint-disable unicorn/escape-case */
 /* eslint-disable no-console */
 const express = require('express');
 const admin = require('./connection/firebaseAdmin');
 
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line unicorn/escape-case
 const RED = '\x1b[31m %s';
-// eslint-disable-next-line unicorn/escape-case
 const GREEN = '\x1b[32m';
 const app = express();
 const router = express.Router();
@@ -46,8 +44,10 @@ router.post('/checkAuth', async (req, res) => {
       .split(';')
       .find((c) => c.trim().startsWith('access_token='))
       .split('=')[1];
+
     const decodedToken = await admin.auth().verifyIdToken(token);
     if (decodedToken) console.log(GREEN, 'PASS');
+
     return res.json({ success: true });
   } catch {
     console.log(RED, 'response: Auth Failed');

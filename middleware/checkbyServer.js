@@ -1,10 +1,11 @@
-/* eslint-disable */
 export default async function ({ $axios, req, redirect }) {
   if (process.server) {
     try {
+      if (!req.headers.cookie) return redirect('/login');
+
       const accesstoken = req.headers.cookie
-      .split(';')
-      .find((c) => c.trim().startsWith('access_token='))
+        .split(';')
+        .find((c) => c.trim().startsWith('access_token='));
 
       if (!accesstoken) return redirect('/login');
 
@@ -14,6 +15,8 @@ export default async function ({ $axios, req, redirect }) {
       if (!success) return redirect('/login');
     } catch (error) {
       console.log(error);
+      redirect('/login');
     }
   }
+  return undefined;
 }
