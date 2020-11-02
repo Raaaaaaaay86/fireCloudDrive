@@ -11,37 +11,40 @@ const state = () => ({
 });
 
 const actions = {
-  nuxtServerInit(vueContext) {
-    return database.ref('root').once('value', (snap) => {
-      vueContext.commit('SET_FILES_DATA', snap.val());
-    });
+  nuxtServerInit({ commit }) {
+    return database.ref('root')
+      .once('value', (snap) => {
+        commit('SET_FILES_DATA', snap.val());
+      });
   },
-  fetchPathFiles(context, { path }) {
-    return database.ref(path).once('value', (snap) => {
-      context.commit('SET_PATH_FILES', snap.val());
-    });
+  fetchPathFiles({ commit }, { path }) {
+    return database.ref(path)
+      .once('value', (snap) => {
+        commit('SET_PATH_FILES', snap.val());
+      });
   },
-  fetchArchivedFiles(context) {
-    return database.ref('archives').once('value', (snap) => {
-      context.commit('SET_ARCHIVE_DATA', snap.val());
-    });
+  fetchArchivedFiles({ commit }) {
+    return database.ref('archives')
+      .once('value', (snap) => {
+        commit('SET_ARCHIVE_DATA', snap.val());
+      });
   },
-  uploadFile(context, e) {
+  uploadFile({ state, commit }, e) {
     if (e.target.files.length === 0) {
       return;
     }
 
     const file = e.target.files[0];
     const { size } = e.target.files[0];
-    const { currentPath } = context.state;
+    const { currentPath } = state;
     const storageRef = storage.ref(`${currentPath}/${file.name}`);
-    const databaseRef = currentPath.replace(/\//g, '-');
+    const databaseRef = currentPath.replace(/\//g, '-'); // Convert to the nodeName of Database
 
     storageRef.put(file)
       .then(() => {
         storageRef.getDownloadURL()
           .then((snap) => {
-            const pushRef = database.ref(`${databaseRef}`).push();
+            const pushRef = database.ref(databaseRef).push();
             const data = {
               downloadURL: snap,
               type: 'file',
@@ -54,15 +57,14 @@ const actions = {
               size,
               archive: false,
             };
-
-            context.commit('ADD_FILES_DATA', data);
+            commit('ADD_FILES_DATA', data);
             pushRef.set(data);
           });
       });
   },
-  createNewFolder(context, { folderName }) {
-    const { currentPath } = context.state;
-    const currentPathRef = currentPath.replace(/\//, '-');
+  createNewFolder({ state, commit }, { folderName }) {
+    const { currentPath } = state;
+    const currentPathNodeName = currentPath.replace(/\//, '-');
     const data = {
       folderName,
       name: folderName,
@@ -70,77 +72,72 @@ const actions = {
       path: `${currentPath}/${folderName}`,
       updateTime: new Date().getTime(),
       archive: false,
+      size: 0,
     };
 
-    return database.ref(`${currentPathRef}/${data.folderName}`)
+    return database.ref(`${currentPathNodeName}/${data.folderName}`)
       .set(data)
       .then(() => {
-        context.commit('ADD_FOLDER_DATA', data);
-        const newDatabaseRef = data.path.replace(/\//g, '-');
-        database.ref(`/${newDatabaseRef}/init`).set(true);
+        commit('ADD_FOLDER_DATA', data);
+        const newDatabaseNodeName = data.path.replace(/\//g, '-');
+        database.ref(`/${newDatabaseNodeName}/init`).set(true);
       });
   },
-  deleteFile(context, file) {
+  deleteFile({ commit }, file) {
     const storageRef = storage.ref();
     const { path, storagePath, key } = file;
-    const databasePathRef = path.replace(/\//g, '-');
+    const databasePathNodeName = path.replace(/\//g, '-');
 
-    database.ref(`${databasePathRef}/${key}`).remove()
+    database.ref(`${databasePathNodeName}/${key}`).remove()
       .then(() => {
         storageRef.child(storagePath).delete();
-        context.commit('REMOVE_FILES_DATA', key);
+        commit('REMOVE_FILES_DATA', key);
       });
   },
-  deleteFolder(context, folder) {
+  async deleteFolder({ commit }, folder) {
     const { path, folderName } = folder;
-    const databasePathRef = path.replace(/\//g, '-');
+    const databasePathNodeName = path.replace(/\//g, '-');
 
-    database.ref(path).remove()
-      .then(() => {
-        context.commit('REMOVE_FILES_DATA', folderName);
-        database.ref(`${databasePathRef}`).remove();
-      });
+    await database.ref(path).remove();
+    commit('REMOVE_FILES_DATA', folderName);
+    database.ref(`${databasePathNodeName}`).remove();
   },
-  toggleArchive(context, file) {
-    // const databasePathRef = context.state.currentPath.replace(/\//g, '-');
+  async toggleArchive({ commit }, file) {
     const { key, archive, storagePath } = file;
     const storagePathArray = storagePath.split('/');
     storagePathArray.pop();
     const path = storagePathArray.join('-');
 
-    database.ref(`${path}/${key}/archive`)
-      .set(!archive)
-      .then(() => {
-        context.commit('SET_FILES_ARCHIVE', { key, archive });
-      });
+    await database.ref(`${path}/${key}/archive`).set(!archive);
+    commit('SET_FILES_ARCHIVE', { key, archive });
 
+    const databaseRef = database.ref(`archives/${key}`);
     if (archive) {
-      database.ref(`archives/${key}`).remove();
-      context.commit('REMOVE_LOCAL_ARCHIVE', { key });
+      databaseRef.remove();
+      commit('REMOVE_LOCAL_ARCHIVE', { key });
     } else {
       const uploadFile = { ...file };
       uploadFile.archive = true;
-      database.ref(`archives/${key}`).set(uploadFile);
+      databaseRef.set(uploadFile);
     }
   },
-  toggleArchiveFolder(context, folder) {
+  async toggleArchiveFolder({ commit }, folder) {
     const { folderName, archive, path } = folder;
+
     // Toggle the Archive value of Database
-    database.ref(`${path}/archive`)
-      .set(!archive)
-      .then(() => {
-        context.commit('SET_FOLDER_ARCHIVE', { folderName, archive });
-      });
+    await database.ref(`${path}/archive`).set(!archive);
+    commit('SET_FOLDER_ARCHIVE', { folderName, archive });
+
     // Adding or removing the folder info in the DB(archives/)
+    const databaseArchiveNodeName = path.replace(/\//g, '-');
+    const databaseRef = database.ref(`archives/${databaseArchiveNodeName}`);
     if (archive) {
-      const databaseArchivePathRef = path.replace(/\//g, '-');
-      database.ref(`archives/${databaseArchivePathRef}`).remove();
-      context.commit('REMOVE_LOCAL_ARCHIVE', { key: databaseArchivePathRef });
+      databaseRef.remove();
+      commit('REMOVE_LOCAL_ARCHIVE', { key: databaseArchiveNodeName });
     } else {
-      const databaseArchivePathRef = path.replace(/\//g, '-');
       const uploadFolder = { ...folder };
       uploadFolder.archive = true;
-      database.ref(`archives/${databaseArchivePathRef}`).set(uploadFolder);
+      databaseRef.set(uploadFolder);
     }
   },
   updateCurrentPath(context, newPath) {
