@@ -8,20 +8,19 @@ const state = () => ({
   pathFiles: {},
   archivedFiles: {},
   currentPath: 'root',
+  usedStorage: 0,
 });
 
 const actions = {
-  nuxtServerInit({ commit }) {
-    return database.ref('root')
-      .once('value', (snap) => {
-        commit('SET_FILES_DATA', snap.val());
-      });
+  async nuxtServerInit({ commit }) {
+    await database.ref('root')
+      .once('value', (snap) => commit('SET_FILES_DATA', snap.val()));
+    await database.ref('usedStorage')
+      .once('value', (snap) => commit('SET_USED_STORAGE', snap.val()));
   },
   fetchPathFiles({ commit }, { path }) {
     return database.ref(path)
-      .once('value', (snap) => {
-        commit('SET_PATH_FILES', snap.val());
-      });
+      .once('value', (snap) => commit('SET_PATH_FILES', snap.val()));
   },
   fetchArchivedFiles({ commit }) {
     return database.ref('archives')
@@ -65,7 +64,7 @@ const actions = {
         dispatch('nuxtServerInit'); // Refetch the data from DB in order to update
       });
   },
-  createNewFolder({ state, commit }, { folderName }) {
+  async createNewFolder({ state, commit }, { folderName }) {
     const { currentPath } = state;
     const currentPathNodeName = currentPath.replace(/\//, '-');
     const data = {
@@ -77,14 +76,11 @@ const actions = {
       archive: false,
       size: 0,
     };
+    const newDatabaseNodeName = data.path.replace(/\//g, '-');
 
-    return database.ref(`${currentPathNodeName}/${data.folderName}`)
-      .set(data)
-      .then(() => {
-        commit('ADD_FOLDER_DATA', data);
-        const newDatabaseNodeName = data.path.replace(/\//g, '-');
-        database.ref(`/${newDatabaseNodeName}/init`).set(true);
-      });
+    await database.ref(`${currentPathNodeName}/${data.folderName}`).set(data);
+    await commit('ADD_FOLDER_DATA', data);
+    await database.ref(`/${newDatabaseNodeName}/init`).set(true);
   },
   deleteFile({ commit, dispatch }, file) {
     const storageRef = storage.ref();
@@ -225,6 +221,9 @@ const mutations = {
   UPDATE_PATH(state, newPath) {
     state.currentPath = newPath;
   },
+  SET_USED_STORAGE(state, usedStorage) {
+    state.usedStorage = usedStorage;
+  },
 };
 
 const getters = {
@@ -283,6 +282,9 @@ const getters = {
   },
   currentPath(state) {
     return state.currentPath;
+  },
+  usedStorage(state) {
+    return state.usedStorage;
   },
 };
 

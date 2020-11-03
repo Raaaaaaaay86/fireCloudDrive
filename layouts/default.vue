@@ -58,7 +58,7 @@
           登出
         </div>
       </div>
-      <UserInfo />
+      <UserInfo :used-storage="usedStorage" />
     </div>
     <div class="col-span-10 bg-white overflow-auto">
       <Nuxt />
@@ -70,6 +70,7 @@
 <script>
 import UserInfo from '@/components/UI/UserInfo';
 import NewFileModal from '@/components/UI/NewFileModal';
+import { mapGetters } from 'vuex';
 
 export default {
   middleware: ['checkbyServer'],
@@ -83,18 +84,13 @@ export default {
     };
   },
   computed: {
-    rootFileNames() {
-      return this.$store.getters.rootFileNames;
-    },
-    pathFileNames() {
-      return this.$store.getters.pathFileNames;
-    },
-    rootFolderNames() {
-      return this.$store.getters.rootFolderNames;
-    },
-    currentPath() {
-      return this.$store.getters.currentPath;
-    },
+    ...mapGetters([
+      'rootFileNames',
+      'pathFileNames',
+      'rootFolderNames',
+      'currentPath',
+      'usedStorage',
+    ]),
   },
   mounted() {
     document.addEventListener('click', this.close);
