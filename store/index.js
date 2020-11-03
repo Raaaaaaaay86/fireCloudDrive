@@ -194,16 +194,18 @@ const mutations = {
     }
   },
   SET_FILES_ARCHIVE(state, { key, archive }) {
-    if (state.currentPath === 'root') {
+    if (state.fetchedFiles[key]) {
       state.fetchedFiles[key].archive = !archive;
-    } else {
+    }
+    if (state.pathFiles[key]) {
       state.pathFiles[key].archive = !archive;
     }
   },
   SET_FOLDER_ARCHIVE(state, { folderName, archive }) {
-    if (state.currentPath === 'root') {
+    if (state.fetchedFiles[folderName]) {
       state.fetchedFiles[folderName].archive = !archive;
-    } else {
+    }
+    if (state.pathFiles[folderName]) {
       state.pathFiles[folderName].archive = !archive;
     }
   },
