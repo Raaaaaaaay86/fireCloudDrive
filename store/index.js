@@ -1,6 +1,6 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-param-reassign */
-import { storage, database } from '@/plugins/firebase';
+import { storage, database, firebase } from '@/plugins/firebase';
 import Vue from 'vue';
 
 const state = () => ({
@@ -29,7 +29,7 @@ const actions = {
         commit('SET_ARCHIVE_DATA', snap.val());
       });
   },
-  uploadFile({ state, commit }, e) {
+  async uploadFile({ state, commit, dispatch }, e) {
     if (e.target.files.length === 0) {
       return;
     }
@@ -38,28 +38,31 @@ const actions = {
     const { size } = e.target.files[0];
     const { currentPath } = state;
     const storageRef = storage.ref(`${currentPath}/${file.name}`);
-    const databaseRef = currentPath.replace(/\//g, '-'); // Convert to the nodeName of Database
+    const databaseRefNodeName = currentPath.replace(/\//g, '-'); // Convert to the nodeName of Database
 
-    storageRef.put(file)
-      .then(() => {
-        storageRef.getDownloadURL()
-          .then((snap) => {
-            const pushRef = database.ref(databaseRef).push();
-            const data = {
-              downloadURL: snap,
-              type: 'file',
-              fileName: file.name,
-              name: file.name,
-              storagePath: `${currentPath}/${file.name}`,
-              path: currentPath,
-              updateTime: new Date().getTime(),
-              key: pushRef.key,
-              size,
-              archive: false,
-            };
-            commit('ADD_FILES_DATA', data);
-            pushRef.set(data);
-          });
+    await storageRef.put(file);
+    storageRef.getDownloadURL()
+      .then((snap) => {
+        const pushRef = database.ref(databaseRefNodeName).push();
+        const data = {
+          downloadURL: snap,
+          type: 'file',
+          fileName: file.name,
+          name: file.name,
+          storagePath: `${currentPath}/${file.name}`,
+          path: currentPath,
+          updateTime: new Date().getTime(),
+          key: pushRef.key,
+          size,
+          archive: false,
+        };
+        commit('ADD_FILES_DATA', data); // Update Vuex state
+        pushRef.set(data); // Set data Info in the DB.
+        database.ref(currentPath).child('size') // Increase the parent folder's size
+          .set(firebase.database.ServerValue.increment(size));
+        database.ref('usedStorage') // Increase the total size of CloudDrive in DB
+          .set(firebase.database.ServerValue.increment(size));
+        dispatch('nuxtServerInit'); // Refetch the data from DB in order to update
       });
   },
   createNewFolder({ state, commit }, { folderName }) {
@@ -83,9 +86,14 @@ const actions = {
         database.ref(`/${newDatabaseNodeName}/init`).set(true);
       });
   },
-  deleteFile({ commit }, file) {
+  deleteFile({ commit, dispatch }, file) {
     const storageRef = storage.ref();
-    const { path, storagePath, key } = file;
+    const {
+      path,
+      storagePath,
+      key,
+      size,
+    } = file;
     const databasePathNodeName = path.replace(/\//g, '-');
 
     database.ref(`${databasePathNodeName}/${key}`).remove()
@@ -93,14 +101,21 @@ const actions = {
         storageRef.child(storagePath).delete();
         commit('REMOVE_FILES_DATA', key);
       });
+    database.ref(path).child('size') // Decrease the parent folder size in DB
+      .set(firebase.database.ServerValue.increment(-size));
+    database.ref('usedStorage') // Decrease the used storage in DB
+      .set(firebase.database.ServerValue.increment(-size));
+    dispatch('nuxtServerInit');
   },
   async deleteFolder({ commit }, folder) {
-    const { path, folderName } = folder;
+    const { path, folderName, size } = folder;
     const databasePathNodeName = path.replace(/\//g, '-');
 
     await database.ref(path).remove();
     commit('REMOVE_FILES_DATA', folderName);
     database.ref(`${databasePathNodeName}`).remove();
+    database.ref('usedStorage') // Decrease the used storage in DB
+      .set(firebase.database.ServerValue.increment(-size));
   },
   async toggleArchive({ commit }, file) {
     const { key, archive, storagePath } = file;
@@ -224,6 +239,7 @@ const getters = {
   },
   rootFileNames(state) {
     const fileNames = [];
+    if (!state.fetchedFiles) return fileNames;
     Object.keys(state.fetchedFiles)
       .forEach((key) => {
         if (state.fetchedFiles[key].type === 'file') {
@@ -234,6 +250,7 @@ const getters = {
   },
   rootFolderNames(state) {
     const folderNames = [];
+    if (state.fetchedFiles) return folderNames;
     Object.keys(state.fetchedFiles)
       .forEach((key) => {
         if (state.fetchedFiles[key].type === 'folder') {
@@ -244,6 +261,7 @@ const getters = {
   },
   pathFileNames(state) {
     const fileNames = [];
+    if (!state.pathFiles) return fileNames;
     Object.keys(state.pathFiles)
       .forEach((key) => {
         if (state.pathFiles[key].type === 'file') {
@@ -254,6 +272,7 @@ const getters = {
   },
   pathFolderNames(state) {
     const folderNames = [];
+    if (!state.pathFiles) return folderNames;
     Object.keys(state.pathFiles)
       .forEach((key) => {
         if (state.pathFiles[key].type === 'folder') {

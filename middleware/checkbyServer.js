@@ -14,7 +14,6 @@ export default async function ({ $axios, req, redirect }) {
 
       if (!success) return redirect('/login');
     } catch (error) {
-      console.log(error);
       redirect('/login');
     }
   }
