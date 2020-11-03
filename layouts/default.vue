@@ -5,6 +5,7 @@
     <div class="pt-16 px-8 pb-8 flex flex-col items-center col-span-2 bg-blue-400 shadow select-none">
       <img class="mb-12" :src="require('@/assets/imgs/logo@2x.png')" alt="logo">
       <div
+        v-if="currentPath !== 'archive'"
         id="uploadButton"
         ref="uploadButton"
         class="inline-block px-8 py-2 mb-8 bg-white text-blue-400 text-xl rounded-full shadow relative cursor-pointer"

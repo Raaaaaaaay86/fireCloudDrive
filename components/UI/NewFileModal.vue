@@ -10,25 +10,27 @@
         </h1>
         <i class="fas fa-times cursor-pointer" @click="closeModal" />
       </div>
-      <input
-        v-model="newFolderName"
-        type="text"
-        class="h-12 w-full mb-4 bg-gray-300"
-      >
-      <div style="pointer-events: auto;">
-        <Button
-          class="mr-2 border border-gray-600 cursor-pointer hover:bg-gray-600 hover:text-white"
-          @click.native.prevent="closeModal"
+      <form class="w-full" @submit.prevent="createNewFolder">
+        <input
+          v-model="newFolderName"
+          type="text"
+          class="h-12 w-full mb-4 bg-gray-300"
         >
-          取消
-        </Button>
-        <Button
-          class="bg-blue-400 text-white cursor-pointer"
-          @click.native.prevent="creatNewFolder"
-        >
-          建立
-        </Button>
-      </div>
+        <div class="flex justify-center" style="pointer-events: auto;">
+          <Button
+            class="mr-2 border border-gray-600 cursor-pointer hover:bg-gray-600 hover:text-white"
+            @click.native.prevent="closeModal"
+          >
+            取消
+          </Button>
+          <Button
+            class="bg-blue-400 text-white cursor-pointer"
+            @click.native.prevent="createNewFolder"
+          >
+            建立
+          </Button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -56,7 +58,7 @@ export default {
     closeModal() {
       this.$store.dispatch('modal/close');
     },
-    creatNewFolder() {
+    createNewFolder() {
       const vm = this;
       const folderName = vm.newFolderName;
       // If folderName is already existed in the current path, would return alert.

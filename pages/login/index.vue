@@ -1,6 +1,9 @@
 <template>
   <div class="h-screen flex justify-center items-center">
-    <div class="h-64 px-8 w-64 flex flex-col justify-center items-center bg-blue-300 rounded shadow">
+    <form
+      class="h-64 px-8 w-64 flex flex-col justify-center items-center bg-blue-300 rounded shadow"
+      @submit.prevent="logIn"
+    >
       <label for="email" class="self-start">
         Email
       </label>
@@ -9,13 +12,13 @@
         Password
       </label>
       <input v-model="password" name="password" type="password" class="mb-8 w-full rounded">
-      <div
+      <button
         class="py-2 px-4 bg-blue-400 rounded shadow cursor-pointer hover:bg-blue-500"
         @click.prevent="logIn"
       >
         Log In
-      </div>
-    </div>
+      </button>
+    </form>
   </div>
 </template>
 

@@ -67,6 +67,7 @@ export default {
     FileInfo,
   },
   middleware({ store }) {
+    store.dispatch('updateCurrentPath', 'archive');
     return store.dispatch('fetchArchivedFiles');
   },
   data() {
