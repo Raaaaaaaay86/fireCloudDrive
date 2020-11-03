@@ -5,6 +5,7 @@
       class="float-right relative ml-auto mb-8"
     >
       <SearchBar
+        v-model="filterString"
         @toggleSortList=" sortList = !sortList"
       />
       <ul
@@ -74,6 +75,7 @@ export default {
     return {
       sortList: false,
       sortMethod: 'typeDescending',
+      filterString: '',
     };
   },
   computed: {
@@ -103,6 +105,14 @@ export default {
         dataArray.sort((a, b) => b.name.localeCompare(a.name));
       } else if (vm.sortMethod === 'typeDescending') {
         dataArray.sort((a, b) => a.type - b.type);
+      }
+
+      if (vm.filterString.length !== 0) {
+        const filteredResult = dataArray.filter((file) => {
+          const string = vm.filterString.toUpperCase().trim();
+          return file.name.toUpperCase().trim().includes(string);
+        });
+        return filteredResult;
       }
       return dataArray;
     },

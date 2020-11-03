@@ -8,6 +8,7 @@
       class="float-right relative ml-auto mb-8"
     >
       <SearchBar
+        v-model="filterString"
         @toggleSortList=" sortList = !sortList"
       />
       <ul
@@ -77,6 +78,7 @@ export default {
     return {
       sortList: false,
       sortMethod: 'typeDescending',
+      filterString: '',
     };
   },
   computed: {
@@ -86,7 +88,7 @@ export default {
       const dataArray = [];
       // convert the data type from Object to Array in order to use Array.sort().
       Object.keys(data).forEach((key) => {
-        dataArray.push(data[key]);
+        if (typeof data[key] === 'object') dataArray.push(data[key]);
       });
       // to change sort condition if vm.sortMethod changed.
       if (vm.sortMethod === 'updateTimeAscending') {
@@ -107,6 +109,14 @@ export default {
         dataArray.sort((a, b) => b.name.localeCompare(a.name));
       } else if (vm.sortMethod === 'typeDescending') {
         dataArray.sort((a, b) => a.type - b.type);
+      }
+
+      if (vm.filterString.length !== 0) {
+        const filteredResult = dataArray.filter((file) => {
+          const string = vm.filterString.toUpperCase().trim();
+          return file.name.toUpperCase().trim().includes(string);
+        });
+        return filteredResult;
       }
       return dataArray;
     },

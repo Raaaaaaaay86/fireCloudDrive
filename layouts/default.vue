@@ -120,6 +120,8 @@ export default {
       this.$store.dispatch('modal/open');
     },
     close(e) {
+      const vm = this;
+      if (vm.currentPath === 'archive') return;
       if (!this.$refs.uploadButton.contains(e.target)) {
         this.uploadList = false;
       }
