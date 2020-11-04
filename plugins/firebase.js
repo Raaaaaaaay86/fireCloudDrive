@@ -27,10 +27,10 @@ const auth = firebase.auth();
 if (process.client) {
   auth.onAuthStateChanged((user) => {
     if (user) {
-      console.log('stateChange: LoggedIn');
+      console.log('UserStatus: LoggedIn');
       auth.app.currentUser = user;
     } else {
-      console.log('stateChange: LoggedOut');
+      console.log('UserStatus: LoggedOut');
       auth.app.currentUser = null;
     }
   });

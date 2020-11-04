@@ -15,7 +15,7 @@ router.use((req, res, next) => {
   next();
 });
 
-console.log('Express啟動');
+console.log('Express Start Up !');
 
 router.post('/login', (req, res) => {
   try {
@@ -48,11 +48,11 @@ router.post('/checkAuth', async (req, res) => {
       .split('=')[1];
 
     const decodedToken = await admin.auth().verifyIdToken(token);
-    if (decodedToken) console.log(GREEN, 'PASS');
+    if (decodedToken) console.log(GREEN, 'Express Auth... PASS!');
 
     return res.json({ success: true });
   } catch {
-    console.log(RED, 'response: Auth Failed');
+    console.log(RED, 'Express Auth... FAIED!');
     return res.json({ success: false });
   }
 });

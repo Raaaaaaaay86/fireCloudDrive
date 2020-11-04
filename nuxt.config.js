@@ -48,7 +48,7 @@ export default {
   ],
   proxy: {
     '/api': {
-      target: 'https://cloud-drive-raylin.herokuapp.com/',
+      target: process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : 'https://cloud-drive-raylin.herokuapp.com/',
       pathRewrite: {
         '^/api': '/',
       },
@@ -57,7 +57,7 @@ export default {
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
     proxy: true,
-    baseURL: 'https://cloud-drive-raylin.herokuapp.com/',
+    baseURL: process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : 'https://cloud-drive-raylin.herokuapp.com/',
     credentials: true,
   },
 
