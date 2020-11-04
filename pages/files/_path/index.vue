@@ -63,6 +63,7 @@ import SearchBar from '@/components/UI/SearchBar';
 import FilesTable from '@/components/UI/FilesTable';
 import FileInfo from '@/components/UI/FileInfo';
 import FolderInfo from '@/components/UI/FolderInfo';
+import { database } from '@/plugins/firebase';
 
 export default {
   components: {
@@ -71,9 +72,13 @@ export default {
     FileInfo,
     FolderInfo,
   },
-  middleware({ route, store }) {
+  async middleware({ route, store, redirect }) {
     const { path } = route.params;
     const slashPath = path.replace(/-/g, '/');
+    database.ref('/') // If DB ref('root-nonExist') !hasChild() then redirect('/')
+      .once('value', (snap) => {
+        if (!snap.hasChild(path)) redirect('/');
+      });
     store.dispatch('updateCurrentPath', slashPath);
     return store.dispatch('fetchPathFiles', { path });
   },
