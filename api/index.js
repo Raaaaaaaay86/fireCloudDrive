@@ -12,7 +12,12 @@ router.use((req, res, next) => {
   Object.setPrototypeOf(res, app.response);
   req.res = res;
   res.req = req;
+  console.log('Express啟動');
   next();
+});
+
+app.listen(3000, () => {
+  console.log('Express Listening on PORT 3000');
 });
 
 router.post('/login', (req, res) => {
