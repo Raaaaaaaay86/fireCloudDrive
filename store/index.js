@@ -52,6 +52,7 @@ const actions = {
           path: currentPath,
           updateTime: new Date().getTime(),
           key: pushRef.key,
+          author: 'Ray Lin',
           size,
           archive: false,
         };
@@ -68,13 +69,14 @@ const actions = {
     const { currentPath } = state;
     const currentPathNodeName = currentPath.replace(/\//, '-');
     const data = {
+      type: 'folder',
       folderName,
       name: folderName,
-      type: 'folder',
       path: `${currentPath}/${folderName}`,
       updateTime: new Date().getTime(),
       archive: false,
       size: 0,
+      author: 'Ray Lin',
     };
     const newDatabaseNodeName = data.path.replace(/\//g, '-');
 
