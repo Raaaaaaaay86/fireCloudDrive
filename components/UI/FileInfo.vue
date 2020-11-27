@@ -51,7 +51,6 @@
       <li @click.prevent="deleteFile">
         刪除
       </li>
-      <li>移動</li>
     </ul>
   </div>
 </template>

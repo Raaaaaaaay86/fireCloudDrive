@@ -61,8 +61,8 @@ const actions = {
         database.ref(currentPath).child('size') // Increase the parent folder's size
           .set(firebase.database.ServerValue.increment(size));
         database.ref('usedStorage') // Increase the total size of CloudDrive in DB
-          .set(firebase.database.ServerValue.increment(size));
-        dispatch('nuxtServerInit'); // Refetch the data from DB in order to update
+          .set(firebase.database.ServerValue.increment(size))
+          .then(() => dispatch('nuxtServerInit')); // Refetch the data from DB in order to update
       });
   },
   async createNewFolder({ state, commit }, { folderName }) {
@@ -102,8 +102,8 @@ const actions = {
     database.ref(path).child('size') // Decrease the parent folder size in DB
       .set(firebase.database.ServerValue.increment(-size));
     database.ref('usedStorage') // Decrease the used storage in DB
-      .set(firebase.database.ServerValue.increment(-size));
-    dispatch('nuxtServerInit');
+      .set(firebase.database.ServerValue.increment(-size))
+      .then(() => dispatch('nuxtServerInit'));
   },
   async deleteFolder({ commit }, folder) {
     const { path, folderName, size } = folder;

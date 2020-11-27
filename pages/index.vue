@@ -118,6 +118,7 @@ export default {
         });
         return filteredResult;
       }
+
       return dataArray;
     },
   },

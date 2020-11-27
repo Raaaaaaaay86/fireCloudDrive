@@ -22,10 +22,6 @@
               <i class="far fa-file" />
               上傳檔案
             </li>
-            <li>
-              <i class="far fa-folder" />
-              上傳資料夾
-            </li>
             <li @click.prevent="openModal">
               <i class="far fa-folder-open" />
               新資料夾
@@ -65,12 +61,14 @@
       <Nuxt />
     </div>
     <NewFileModal />
+    <Uploading />
   </div>
 </template>
 
 <script>
 import UserInfo from '@/components/UI/UserInfo';
 import NewFileModal from '@/components/UI/NewFileModal';
+import Uploading from '@/components/UI/Uploading';
 import { mapGetters } from 'vuex';
 
 export default {
@@ -78,6 +76,7 @@ export default {
   components: {
     UserInfo,
     NewFileModal,
+    Uploading,
   },
   data() {
     return {
@@ -111,9 +110,11 @@ export default {
         return alert('檔名已存在');
       }
       // Sending the CreateNewFile request.
+      this.$store.commit('uploading/OPEN');
       return this.$store.dispatch('uploadFile', e)
         .then(() => {
           this.uploadList = false; // Close the dropdown list.
+          this.$store.commit('uploading/CLOSE');
         });
     },
     openModal() {

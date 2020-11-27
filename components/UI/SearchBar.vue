@@ -11,7 +11,7 @@
     >
     <p
       class="mr-4 text-gray-700 cursor-pointer"
-      :value="value"
+      @click.prevent="$emit('toggleSortList', true)"
     >
       ▼
     </p>
@@ -22,9 +22,9 @@
 export default {
   props: {
     value: {
-      type: String,
+      type: Boolean,
       required: false,
-      default: '',
+      default: false,
     },
   },
 };
