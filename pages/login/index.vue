@@ -27,8 +27,8 @@ export default {
   layout: 'login',
   data() {
     return {
-      email: '',
-      password: '',
+      email: 'test01@mail.com',
+      password: 'qwe123',
     };
   },
   methods: {
